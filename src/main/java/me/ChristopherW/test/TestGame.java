@@ -61,31 +61,21 @@ public class TestGame implements ILogic {
         defaultTexture = new Texture(loader.loadTexture("assets/textures/default.png"));
         Texture courseTexture1 = new Texture(loader.loadTexture("assets/textures/GolfCourse.png"));
         Texture courseTexture2 = new Texture(loader.loadTexture("assets/textures/GolfCourse2.png"));
+        Texture courseTexture3 = new Texture(loader.loadTexture("assets/textures/GolfCourse3.png"));
         Texture ballTexture = new Texture(loader.loadTexture("assets/textures/GolfBall.png"));
 
         entities = new HashMap<>();
 
         courseManager.AddHole(new Hole(new Vector3f(0, 0, -1), loader.loadModel("assets/models/ground.obj", courseTexture1), loader.loadModel("assets/models/walls.obj", courseTexture1), loader, physicsSpace));
-        courseManager.AddHole(new Hole(new Vector3f(1, 0, 0), loader.loadModel("assets/models/ground2.obj", courseTexture2), loader.loadModel("assets/models/walls2.obj", courseTexture2), loader, physicsSpace));
+        courseManager.AddHole(new Hole(new Vector3f(0, 0, -1), loader.loadModel("assets/models/ground2.obj", courseTexture2), loader.loadModel("assets/models/walls2.obj", courseTexture2), loader, physicsSpace));
+        courseManager.AddHole(new Hole(new Vector3f(1, 0, 0), loader.loadModel("assets/models/ground3.obj", courseTexture3), loader.loadModel("assets/models/walls3.obj", courseTexture3), loader, physicsSpace));
         entities.putAll(courseManager.InitHoles());
 
-        Model ballModel = loader.loadModel("assets/models/ball.obj");
-        ballModel.getMaterial().setTexture(ballTexture);
-        ballModel.getMaterial().setReflectability(0f);
-        float ballScale = 0.0795f;
-        GolfBall ballEntity = new GolfBall(ballModel, new Vector3f(0,0.4f,-1f), new Vector3f(0,0,0), ballScale);
-        CollisionShape ballShape = new SphereCollisionShape(ballScale);
-        float ballMass = 1f;
-        PhysicsRigidBody ballRigidBody = new PhysicsRigidBody(ballShape, ballMass);
-        ballRigidBody.setPhysicsLocation(Utils.convert(ballEntity.getPosition()));
-        ballRigidBody.setRestitution(0.9f);
-        ballRigidBody.setCcdMotionThreshold(0.015f);
-        ballRigidBody.setCcdSweptSphereRadius(0.01f);
-        ballEntity.setRigidBody(ballRigidBody);
-        physicsSpace.addCollisionObject(ballRigidBody);
-        entities.put("Ball", ballEntity);
+        courseManager.AddBall(ballTexture, loader, physicsSpace);
+        courseManager.AddBall(defaultTexture, loader, physicsSpace);
+        entities.putAll(courseManager.InitBalls());
 
-        Entity previewEntity = new Entity(ballModel, new Vector3f(0,0.4f,0), new Vector3f(0,0,0), 0.05f);
+        Entity previewEntity = new Entity(loader.loadModel("assets/models/ball.obj", ballTexture), new Vector3f(0,0.4f,0), new Vector3f(0,0,0), 0.05f);
         entities.put("Preview", previewEntity);
     }
 
@@ -99,44 +89,58 @@ public class TestGame implements ILogic {
     @Override
     public void input(MouseInput input, double deltaTime, int frame) {
         cameraInc.set(0,0,0);
-        GolfBall ball = (GolfBall) entities.get("Ball");
+        GolfBall activeBall = courseManager.GetActiveBall();
         Entity preview = entities.get("Preview");
 
         rotation -= input.getDisplVec().y * Constants.MOUSE_SENSITIVITY * deltaTime;
+        if(window.isKeyPressed(GLFW.GLFW_KEY_UP)) {
+            radius = Utils.clamp(radius -= 0.0125f, 1, 100);
+        }
+        if(window.isKeyPressed(GLFW.GLFW_KEY_DOWN)) {
+            radius = Utils.clamp(radius += 0.0125f, 1, 100);
+        }
         if(window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) {
-            ball.setPosition(courseManager.GetActiveHole().getStartPos());
-            ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
-            ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
+            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_1)) {
             courseManager.SetHole(0);
-            ball.setPosition(courseManager.GetActiveHole().getStartPos());
-            ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
-            ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
+            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
 
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_2)) {
             courseManager.SetHole(1);
-            ball.setPosition(courseManager.GetActiveHole().getStartPos());
-            ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
-            ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
+            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
         }
-        if(Math.abs(ball.getRigidBody().getLinearVelocity(null).x) < minVel && Math.abs(ball.getRigidBody().getLinearVelocity(null).z) < minVel) {
+        if(window.isKeyPressed(GLFW.GLFW_KEY_3)) {
+            courseManager.SetHole(2);
+            activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
+            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+        }
+        if(Math.abs(activeBall.getRigidBody().getLinearVelocity(null).x) < minVel && Math.abs(activeBall.getRigidBody().getLinearVelocity(null).z) < minVel) {
             if(start != null) {
-                Vector3f end = ball.getPosition();
+                Vector3f end = activeBall.getPosition();
                 float distance = start.distance(end);
                 System.out.println(distance);
                 start = null;
+                courseManager.NextBall();
+                return;
             }
-            ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
             if(input.isLeftButtonPress()) {
-                preview.setPosition(ball.getPosition());
+                preview.setPosition(activeBall.getPosition());
                 dist += input.getDisplVec().x;
                 dist = Utils.clamp(dist, 0, DIST);
                 Vector3f orbitVec = new Vector3f();
-                orbitVec.x = (float) (dist * -0.01 * Math.sin(Math.toRadians(rotation))) + ball.getPosition().x;
-                orbitVec.y = 0.34f;
-                orbitVec.z = (float) (dist * -0.01 * Math.cos(Math.toRadians(rotation))) + ball.getPosition().z;
+                orbitVec.x = (float) (dist * -0.01 * Math.sin(Math.toRadians(rotation))) + activeBall.getPosition().x;
+                orbitVec.y = 0.4f;
+                orbitVec.z = (float) (dist * -0.01 * Math.cos(Math.toRadians(rotation))) + activeBall.getPosition().z;
                 preview.setPosition(orbitVec);
                 preview.setVisible(true);
             } else {
@@ -144,44 +148,47 @@ public class TestGame implements ILogic {
                 if(dist > 0) {
                     dist = Utils.clamp(dist, 0, DIST);
                     preview.localTranslate(0, 0, -0.01f * dist, camera.getRotation());
-                    start = new Vector3f(ball.getPosition());
-                    Vector3f vel = preview.getPosition().sub(ball.getPosition()).mul(4f);
+                    start = new Vector3f(activeBall.getPosition());
+                    Vector3f vel = preview.getPosition().sub(activeBall.getPosition()).mul(4f);
                     vel.y = 0;
-                    ball.getRigidBody().applyCentralImpulse(Utils.convert(vel));
-                    ball.setStartTime(System.nanoTime());
-                    ball.setShotStrength(dist / DIST);
+                    activeBall.getRigidBody().applyCentralImpulse(Utils.convert(vel));
+                    activeBall.setStartTime(System.nanoTime());
+                    activeBall.setShotStrength(dist / DIST);
                 }
                 dist = 0;
             }
         }
-        if(ball.getPosition().y < 0.155f) {
-            ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
-            ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+        if(activeBall.getPosition().y < 0.155f) {
+            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+            activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
             if(courseManager.GetHoleID(courseManager.GetActiveHole()) < courseManager.GetHoleCount() - 1) {
                 courseManager.NextHole();
-                ball.setPosition(courseManager.GetActiveHole().getStartPos());
+                activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
             }
         }
-        com.jme3.math.Vector3f temp = ball.getRigidBody().getLinearVelocity(null);
-        ball.getRigidBody().setLinearVelocity(new com.jme3.math.Vector3f((float) (temp.x * (1 / (1 + (deltaTime * friction)))), temp.y, (float) (temp.z * (1 / (1 + (deltaTime * friction))))));
+        for(int i = 0; i < courseManager.GetBallCount(); i++) {
+            GolfBall ball = courseManager.GetBall(i);
+            com.jme3.math.Vector3f temp = ball.getRigidBody().getLinearVelocity(null);
+            ball.getRigidBody().setLinearVelocity(new com.jme3.math.Vector3f((float) (temp.x * (1 / (1 + (deltaTime * friction)))), temp.y, (float) (temp.z * (1 / (1 + (deltaTime * friction))))));
+        }
 
         for(Entity entity : entities.values()) {
             if(entity.getRigidBody() != null) {
                 entity.setPosition(Utils.convert(entity.getRigidBody().getPhysicsLocation(null)));
-                entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0).mul((float) (1/deltaTime))));
+
+                if(entity instanceof GolfBall)
+                    entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0).mul((float) (1/deltaTime))));
             }
         }
         physicsSpace.update((float) deltaTime, 2);
     }
-
+    float radius = 5;
     @Override
     public void update(float inteveral, MouseInput mouseInput) {
-
-        float radius = 5f;
         Vector3f orbitVec = new Vector3f();
-        orbitVec.x = (float) (radius * Math.sin(Math.toRadians(rotation))) + entities.get("Ball").getPosition().x;
+        orbitVec.x = (float) (radius * Math.sin(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().x;
         orbitVec.y = radius;
-        orbitVec.z = (float) (radius * Math.cos(Math.toRadians(rotation))) + entities.get("Ball").getPosition().z;
+        orbitVec.z = (float) (radius * Math.cos(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().z;
         camera.setPosition(orbitVec);
         camera.setRotation(30f, -rotation, camera.getRotation().z);
 

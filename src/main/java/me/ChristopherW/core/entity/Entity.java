@@ -1,7 +1,9 @@
 package me.ChristopherW.core.entity;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.math.Quaternion;
 import me.ChristopherW.core.utils.Utils;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class Entity {
@@ -97,10 +99,17 @@ public class Entity {
         this.rotation.x = x;
         this.rotation.y = y;
         this.rotation.z = z;
+        if(this.rigidBody != null) {
+            Quaternion quat = new Quaternion();
+            quat.fromAngles((float) Math.toRadians(x), (float) Math.toRadians(y), (float) Math.toRadians(z));
+            this.rigidBody.setPhysicsRotation(quat);
+        }
+
+
     }
     public void setRotation(Vector3f rotation) {
-        setRotation(rotation.x, rotation.y, rotation.z);
-    }
+            setRotation(rotation.x, rotation.y, rotation.z);
+}
 
     public Model getModel() {
         return model;

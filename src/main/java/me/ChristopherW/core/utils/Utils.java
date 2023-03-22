@@ -2,6 +2,7 @@ package me.ChristopherW.core.utils;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import org.joml.Quaternionf;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.BufferedReader;
@@ -57,6 +58,23 @@ public class Utils {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public static org.joml.Quaternionf ToQuaternion(org.joml.Vector3f vector) {
+        double cr = Math.cos(vector.x * 0.5);
+        double sr = Math.sin(vector.x * 0.5);
+        double cp = Math.cos(vector.y * 0.5);
+        double sp = Math.sin(vector.y * 0.5);
+        double cy = Math.cos(vector.z * 0.5);
+        double sy = Math.sin(vector.z * 0.5);
+
+        org.joml.Quaternionf q = new Quaternionf();
+        q.w = (float) (cr * cp * cy + sr * sp * sy);
+        q.x = (float) (sr * cp * cy - cr * sp * sy);
+        q.y = (float) (cr * sp * cy + sr * cp * sy);
+        q.z = (float) (cr * cp * sy - sr * sp * cy);
+
+        return q;
     }
 
     public static Vector3f convert(org.joml.Vector3f in) {
