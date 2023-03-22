@@ -100,26 +100,26 @@ public class TestGame implements ILogic {
             radius = Utils.clamp(radius += 0.0125f, 1, 100);
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) {
-            activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
+            activeBall.setPosition(courseManager.GetHole(activeBall.getCurrentHoleID()).getStartPos());
             activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
             activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_1)) {
-            courseManager.SetHole(0);
-            activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
+            activeBall.setCurrentHoleID(0);
+            activeBall.setPosition(courseManager.GetHole(activeBall.getCurrentHoleID()).getStartPos());
             activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
             activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
 
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_2)) {
-            courseManager.SetHole(1);
-            activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
+            activeBall.setCurrentHoleID(1);
+            activeBall.setPosition(courseManager.GetHole(activeBall.getCurrentHoleID()).getStartPos());
             activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
             activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_3)) {
-            courseManager.SetHole(2);
-            activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
+            activeBall.setCurrentHoleID(2);
+            activeBall.setPosition(courseManager.GetHole(activeBall.getCurrentHoleID()).getStartPos());
             activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
             activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
         }
@@ -158,16 +158,16 @@ public class TestGame implements ILogic {
                 dist = 0;
             }
         }
-        if(activeBall.getPosition().y < 0.155f) {
-            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
-            activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
-            if(courseManager.GetHoleID(courseManager.GetActiveHole()) < courseManager.GetHoleCount() - 1) {
-                courseManager.NextHole();
-                activeBall.setPosition(courseManager.GetActiveHole().getStartPos());
-            }
-        }
         for(int i = 0; i < courseManager.GetBallCount(); i++) {
             GolfBall ball = courseManager.GetBall(i);
+            if(ball.getPosition().y < 0.155f) {
+                ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+                ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+                if(ball.getCurrentHoleID() < courseManager.GetHoleCount() - 1) {
+                    ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
+                    ball.setPosition(courseManager.GetHole(ball.getCurrentHoleID()).getStartPos());
+                }
+            }
             com.jme3.math.Vector3f temp = ball.getRigidBody().getLinearVelocity(null);
             ball.getRigidBody().setLinearVelocity(new com.jme3.math.Vector3f((float) (temp.x * (1 / (1 + (deltaTime * friction)))), temp.y, (float) (temp.z * (1 / (1 + (deltaTime * friction))))));
         }

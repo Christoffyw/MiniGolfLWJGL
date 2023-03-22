@@ -6,6 +6,8 @@ import me.ChristopherW.core.entity.Model;
 import org.joml.Vector3f;
 
 public class GolfBall extends Entity {
+    private int currentHoleID;
+
     private Vector3f velocity;
     private float friction;
     private long startTime;
@@ -18,6 +20,14 @@ public class GolfBall extends Entity {
         this.startTime = 0;
         this.endTime = 0;
         this.shotStrength = 0;
+    }
+
+    public int getCurrentHoleID() {
+        return currentHoleID;
+    }
+
+    public void setCurrentHoleID(int currentHoleID) {
+        this.currentHoleID = currentHoleID;
     }
 
     public float getFriction() {

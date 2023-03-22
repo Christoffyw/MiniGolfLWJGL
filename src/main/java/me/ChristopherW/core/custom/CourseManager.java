@@ -18,11 +18,9 @@ import java.util.List;
 public class CourseManager {
     HashMap<String, Vector3f> vectorRotationLookup = new HashMap<>();
     ArrayList<Hole> holes = new ArrayList<>();
-    int activeHole;
     ArrayList<GolfBall> balls = new ArrayList<GolfBall>();
     GolfBall activeBall = null;
     public CourseManager() {
-        activeHole = -1;
         vectorRotationLookup.put(new Vector3f(0,0,1).toString(), new Vector3f(0,180,0));
         vectorRotationLookup.put(new Vector3f(0,0,-1).toString(), new Vector3f(0,0,0));
         vectorRotationLookup.put(new Vector3f(1,0,0).toString(), new Vector3f(0,-90,0));
@@ -46,24 +44,11 @@ public class CourseManager {
         }
         return holeEntities;
     }
-    public void NextHole() {
-        activeHole++;
-    }
-    public void SetHole(int id) {
-        activeHole = id;
-    }
     public void AddHole(Hole hole) {
-        if(holes.isEmpty())
-            activeHole = 0;
         holes.add(hole);
     }
     public void RemoveHole(int id) {
         holes.remove(id);
-        if(holes.isEmpty())
-            activeHole = -1;
-    }
-    public Hole GetActiveHole() {
-        return holes.get(activeHole);
     }
     public Hole GetHole(int id) {
         return holes.get(id);
