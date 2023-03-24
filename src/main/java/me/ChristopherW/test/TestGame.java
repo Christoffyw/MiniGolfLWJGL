@@ -64,6 +64,7 @@ public class TestGame implements ILogic {
         Texture courseTexture2 = new Texture(loader.loadTexture("assets/textures/GolfCourse2.png"));
         Texture courseTexture3 = new Texture(loader.loadTexture("assets/textures/GolfCourse3.png"));
         Texture courseTexture4 = new Texture(loader.loadTexture("assets/textures/GolfCourse4.png"));
+        Texture courseTexture5 = new Texture(loader.loadTexture("assets/textures/GolfCourse5.png"));
         Texture shotMeterHeadTexture = new Texture(loader.loadTexture("assets/textures/Arrow.png"));
         Texture shotMeterBaseTexture = new Texture(loader.loadTexture("assets/textures/ArrowBase.png"));
         Texture ballTexture = new Texture(loader.loadTexture("assets/textures/GolfBall.png"));
@@ -74,6 +75,8 @@ public class TestGame implements ILogic {
         courseManager.AddHole(new Hole(new Vector3f(0, 0, -1), loader.loadModel("assets/models/ground2.obj", courseTexture2), loader.loadModel("assets/models/walls2.obj", courseTexture2), loader, physicsSpace));
         courseManager.AddHole(new Hole(new Vector3f(1, 0, 0), loader.loadModel("assets/models/ground3.obj", courseTexture3), loader.loadModel("assets/models/walls3.obj", courseTexture3), loader, physicsSpace));
         courseManager.AddHole(new Hole(new Vector3f(1, 0, 0), loader.loadModel("assets/models/ground4.obj", courseTexture4), loader.loadModel("assets/models/walls4.obj", courseTexture4), loader, physicsSpace));
+        courseManager.AddHole(new Hole(new Vector3f(0, 0, 1), loader.loadModel("assets/models/ground5.obj", courseTexture5), loader.loadModel("assets/models/walls5.obj", courseTexture4), loader, physicsSpace));
+
         entities.putAll(courseManager.InitHoles());
 
         for(int i = 0; i < Constants.PLAYER_COUNT; i++) {
@@ -142,6 +145,8 @@ public class TestGame implements ILogic {
             activeBall.teleportHole(2, courseManager, window);
         if(window.isKeyPressed(GLFW.GLFW_KEY_4))
             activeBall.teleportHole(3, courseManager, window);
+        if(window.isKeyPressed(GLFW.GLFW_KEY_5))
+            activeBall.teleportHole(4, courseManager, window);
 
         Entity shotMeterHead = entities.get("ShotmeterHead");
         Entity shotMeterBase = entities.get("ShotmeterBase");
