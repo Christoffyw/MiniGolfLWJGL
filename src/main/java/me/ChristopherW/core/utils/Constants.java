@@ -10,7 +10,7 @@ public class Constants {
     public static final Vector4f BG_COLOR = new Vector4f(0.53f, 0.81f,0.92f, 1f);
 
     public static final float GRAVITY = -39.2f;
-    public static final boolean FULLSCREEN = false;
+    public static final boolean FULLSCREEN = true;
     public static final int WIDTH = 1280, HEIGHT = 720;
     public static final float FRAMERATE = 999; // ABOVE 999, PHYSICS BREAKS
     public static final boolean VSYNC = true;
@@ -19,9 +19,9 @@ public class Constants {
     public static final float Z_NEAR = 0.01f;
     public static final float Z_FAR = 1000f;
     public static final float CAMERA_MOVE_SPEED = 0.05f;
-    public static final float MOUSE_SENSITIVITY = 10f;
+    public static final float MOUSE_SENSITIVITY = 100f;
 
-    public static final int PLAYER_COUNT = 1;
+    public static final int PLAYER_COUNT = 12;
     public static boolean RANDOM_COLORS = false;
     public static Color[] DEFAULT_BALL_COLORS = {
         new Color(0,100,255),   // Blue

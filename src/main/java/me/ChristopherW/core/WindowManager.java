@@ -34,7 +34,7 @@ public class WindowManager {
         this.height = height;
         this.vSync = vSync;
         projectionMatrix = new Matrix4f();
-        guiManager = new GUIManager();
+        guiManager = new GUIManager(this);
     }
 
     public boolean isResize() {

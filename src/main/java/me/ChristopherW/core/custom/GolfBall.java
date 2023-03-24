@@ -34,6 +34,13 @@ public class GolfBall extends Entity {
         this.color = color;
         this.scores = new HashMap<>();
     }
+    public int getTotalScore() {
+        int totalScore = 0;
+        for(int i : scores.values()) {
+            totalScore += i;
+        }
+        return totalScore;
+    }
     public void setScore(int holeID, int score) {
         scores.put(holeID, score);
     }

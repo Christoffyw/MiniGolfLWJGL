@@ -47,6 +47,7 @@ public class TestGame implements ILogic {
         window = Launcher.getWindow();
         loader = new ObjectLoader();
         courseManager = new CourseManager();
+        window.guiManager.setCourseManager(courseManager);
         physicsSpace = new PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT);
         physicsSpace.getSolverInfo().setSplitImpulseEnabled(true);
         physicsSpace.setGravity(new com.jme3.math.Vector3f(0, Constants.GRAVITY, 0));
@@ -75,7 +76,7 @@ public class TestGame implements ILogic {
         courseManager.AddHole(new Hole(new Vector3f(0, 0, -1), loader.loadModel("assets/models/ground2.obj", courseTexture2), loader.loadModel("assets/models/walls2.obj", courseTexture2), loader, physicsSpace));
         courseManager.AddHole(new Hole(new Vector3f(1, 0, 0), loader.loadModel("assets/models/ground3.obj", courseTexture3), loader.loadModel("assets/models/walls3.obj", courseTexture3), loader, physicsSpace));
         courseManager.AddHole(new Hole(new Vector3f(1, 0, 0), loader.loadModel("assets/models/ground4.obj", courseTexture4), loader.loadModel("assets/models/walls4.obj", courseTexture4), loader, physicsSpace));
-        courseManager.AddHole(new Hole(new Vector3f(0, 0, 1), loader.loadModel("assets/models/ground5.obj", courseTexture5), loader.loadModel("assets/models/walls5.obj", courseTexture4), loader, physicsSpace));
+        courseManager.AddHole(new Hole(new Vector3f(0, 0, 1), loader.loadModel("assets/models/ground5.obj", courseTexture5), loader.loadModel("assets/models/walls5.obj", courseTexture5), loader, physicsSpace));
 
         entities.putAll(courseManager.InitHoles());
 
@@ -103,7 +104,7 @@ public class TestGame implements ILogic {
         entities.putAll(courseManager.InitBalls());
 
         Entity arrowBaseEntity = new Entity(loader.loadModel("assets/models/quad.obj", shotMeterBaseTexture), new Vector3f(0,0.4f,0), new Vector3f(0,0,0), new Vector3f(0.4f,1,1), physicsSpace);
-        Entity arrowHeadEntity = new Entity(loader.loadModel("assets/models/quad.obj", shotMeterHeadTexture), new Vector3f(0,0.4f,0), new Vector3f(0,0,0), new Vector3f(0.15f,1,0.15f), physicsSpace);
+        Entity arrowHeadEntity = new Entity(loader.loadModel("assets/models/quad.obj", shotMeterHeadTexture), new Vector3f(0,0.4f,0), new Vector3f(0,0,0), new Vector3f(0.1f,1,0.1f), physicsSpace);
         Entity previewEntity = new Entity(loader.loadModel("assets/models/ball.obj", ballTexture), new Vector3f(0,0.4f,0), new Vector3f(0,0,0), new Vector3f(0.05f,0.05f,0.05f), physicsSpace);
         previewEntity.setVisible(false);
         arrowHeadEntity.setVisible(false);
