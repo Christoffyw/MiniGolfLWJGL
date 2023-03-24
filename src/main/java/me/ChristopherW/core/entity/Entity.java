@@ -1,5 +1,6 @@
 package me.ChristopherW.core.entity;
 
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
 import me.ChristopherW.core.utils.Utils;
@@ -9,18 +10,36 @@ import org.joml.Vector3f;
 public class Entity {
     private PhysicsRigidBody rigidBody;
     private Model model;
-    private Vector3f position, rotation;
-    private float scale;
+    private Vector3f position, rotation, scale;
     private boolean isVisible;
+    private boolean enabled;
+    private PhysicsSpace physicsSpace;
 
-    public Entity(Model model, Vector3f position, Vector3f rotation, float scale) {
+    public Entity(Model model, Vector3f position, Vector3f rotation, Vector3f scale, PhysicsSpace space) {
         this.model = model;
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
         this.isVisible = true;
+        this.enabled = true;
         this.rigidBody = null;
+        this.physicsSpace = space;
     }
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        if(enabled) {
+            physicsSpace.addCollisionObject(this.rigidBody);
+            this.setVisible(true);
+        } else {
+            physicsSpace.removeCollisionObject(this.rigidBody);
+            this.setVisible(false);
+        }
+    }
+
     public void localTranslate(float x, float y, float z) {
         if(z != 0) {
             position.x += (float) Math.sin(Math.toRadians(rotation.y)) * -1.0f * z;
@@ -110,6 +129,17 @@ public class Entity {
     public void setRotation(Vector3f rotation) {
             setRotation(rotation.x, rotation.y, rotation.z);
 }
+    public void setScale(float scale) {
+        setScale(scale, scale, scale);
+    }
+    public void setScale(Vector3f scale) {
+        setScale(scale.x, scale.y, scale.z);
+    }
+    public void setScale(float x, float y, float z) {
+        this.scale.x = x;
+        this.scale.y = y;
+        this.scale.z = z;
+    }
 
     public Model getModel() {
         return model;
@@ -123,7 +153,7 @@ public class Entity {
         return rotation;
     }
 
-    public float getScale() {
+    public Vector3f getScale() {
         return scale;
     }
 

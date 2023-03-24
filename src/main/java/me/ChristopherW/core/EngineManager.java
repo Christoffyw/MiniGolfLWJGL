@@ -1,5 +1,8 @@
 package me.ChristopherW.core;
 
+import imgui.ImGui;
+import imgui.flag.ImGuiConfigFlags;
+import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.utils.Constants;
 import me.ChristopherW.test.Launcher;
 import me.ChristopherW.test.TestGame;
@@ -71,6 +74,8 @@ public class EngineManager {
             if(render) {
                 update(frametime);
                 render();
+
+
                 input(getFps() == 0 ? 0 : 1f / getFps(), totalFrames);
                 frames++;
                 totalFrames++;

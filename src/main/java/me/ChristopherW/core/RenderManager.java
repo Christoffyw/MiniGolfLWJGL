@@ -91,7 +91,6 @@ public class RenderManager {
         entities.clear();
         shader.unbind();
     }
-
     public void processEntity(Entity entity) {
         List<Entity> entityList = entities.get(entity.getModel());
         if(entityList != null)

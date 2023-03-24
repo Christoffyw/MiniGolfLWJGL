@@ -5,6 +5,7 @@ import com.jme3.math.Vector3f;
 import org.joml.Quaternionf;
 import org.lwjgl.system.MemoryUtil;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +61,29 @@ public class Utils {
         return list;
     }
 
+    public static float GetColorDistance(Color a, Color b) {
+        return (float) Math.sqrt(Math.pow(b.getRed() - a.getRed(),2) + Math.pow(b.getGreen() - a.getGreen(),2) + Math.pow(b.getBlue() - a.getBlue(),2));
+    }
+    public static org.joml.Vector3f ToEulerAngles(org.joml.Quaternionf q) {
+        org.joml.Vector3f angles = new org.joml.Vector3f(0,0,0);
+
+        // roll (x-axis rotation)
+        double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
+        double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
+        angles.x = (float) Math.atan2(sinr_cosp, cosr_cosp);
+
+        // pitch (y-axis rotation)
+        double sinp = Math.sqrt(1 + 2 * (q.w * q.y - q.x * q.z));
+        double cosp = Math.sqrt(1 - 2 * (q.w * q.y - q.x * q.z));
+        angles.y = (float) (2 * Math.atan2(sinp, cosp) - Math.PI / 2);
+
+        // yaw (z-axis rotation)
+        double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+        double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+        angles.z = (float) Math.atan2(siny_cosp, cosy_cosp);
+
+        return angles;
+    }
     public static org.joml.Quaternionf ToQuaternion(org.joml.Vector3f vector) {
         double cr = Math.cos(vector.x * 0.5);
         double sr = Math.sin(vector.x * 0.5);
@@ -88,5 +112,19 @@ public class Utils {
     }
     public static org.joml.Quaternionf convert(Quaternion in) {
         return new org.joml.Quaternionf(in.getX(), in.getY(), in.getZ(), in.getW());
+    }
+
+    public static org.joml.Vector3f localPosition(float x, float y, float z, org.joml.Vector3f rot) {
+        org.joml.Vector3f position = new org.joml.Vector3f(x, y, z);
+        if(z != 0) {
+            position.x = (float) Math.sin(Math.toRadians(rot.y)) * -1.0f * z;
+            position.z = (float) Math.cos(Math.toRadians(rot.y)) * z;
+        }
+        if(x != 0) {
+            position.x = (float) Math.sin(Math.toRadians(rot.y - 90)) * -1.0f * x;
+            position.z = (float) Math.cos(Math.toRadians(rot.y - 90)) * x;
+        }
+        position.y = y;
+        return position;
     }
 }

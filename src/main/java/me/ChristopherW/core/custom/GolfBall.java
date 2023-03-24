@@ -1,25 +1,67 @@
 package me.ChristopherW.core.custom;
 
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import me.ChristopherW.core.WindowManager;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Model;
 import org.joml.Vector3f;
 
+import java.awt.*;
+import java.util.HashMap;
+
 public class GolfBall extends Entity {
     private int currentHoleID;
-
+    private boolean firstShot;
     private Vector3f velocity;
     private float friction;
     private long startTime;
     private long endTime;
     private float shotStrength;
-    public GolfBall(Model model, Vector3f position, Vector3f rotation, float scale) {
-        super(model, position, rotation, scale);
+    private Color color;
+    private HashMap<Integer, Integer> scores;
+    PhysicsSpace physicsSpace;
+    public GolfBall(Model model, Vector3f position, Vector3f rotation, Vector3f scale, Color color, PhysicsSpace space) {
+        super(model, position, rotation, scale, space);
         this.velocity = new Vector3f(0,0,0);
         this.friction = 0.975f;
         this.startTime = 0;
         this.endTime = 0;
         this.shotStrength = 0;
+        this.currentHoleID = 0;
+        this.physicsSpace = space;
+        this.firstShot = true;
+        this.color = color;
+        this.scores = new HashMap<>();
+    }
+    public void setScore(int holeID, int score) {
+        scores.put(holeID, score);
+    }
+    public int getScore(int holeID) {
+        return scores.get(holeID);
+    }
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+    public void teleportHole(int id, CourseManager courseManager, WindowManager window) {
+        this.setCurrentHoleID(id);
+        this.setPosition(courseManager.GetHole(this.getCurrentHoleID()).getStartPos());
+        this.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+        this.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+        window.guiManager.setHoleText(String.format("Hole %d", this.getCurrentHoleID() + 1));
+        window.guiManager.setPlayerText(String.format("Player %d", courseManager.GetBallID(this) + 1));
+        window.guiManager.setStrokeText(String.format("Strokes: %d", this.getScore(this.getCurrentHoleID())));
+    }
+    public boolean isFirstShot() {
+        return firstShot;
+    }
+
+    public void setFirstShot(boolean firstShot) {
+        this.firstShot = firstShot;
     }
 
     public int getCurrentHoleID() {

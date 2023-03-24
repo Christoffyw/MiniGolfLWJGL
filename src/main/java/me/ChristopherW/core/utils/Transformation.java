@@ -9,11 +9,21 @@ import org.joml.Vector3f;
 public class Transformation {
     public static Matrix4f createTransformationMatrix(Entity entity) {
         Matrix4f matrix = new Matrix4f();
-        matrix.identity().translate(entity.getPosition())
+        matrix.identity()
+                .translate(entity.getPosition())
                 .rotateX((float) Math.toRadians(entity.getRotation().x))
                 .rotateY((float) Math.toRadians(entity.getRotation().y))
                 .rotateZ((float) Math.toRadians(entity.getRotation().z))
-                .scale(entity.getScale());
+                .scale(entity.getScale().x, entity.getScale().y, entity.getScale().z);
+        return matrix;
+    }
+
+    public static Matrix4f createRotationMatrix(Vector3f rotation) {
+        Matrix4f matrix = new Matrix4f();
+        matrix.identity()
+                .rotateX((float) Math.toRadians(rotation.x))
+                .rotateY((float) Math.toRadians(rotation.y))
+                .rotateZ((float) Math.toRadians(rotation.z));
         return matrix;
     }
 

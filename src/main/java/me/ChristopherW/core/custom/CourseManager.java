@@ -8,9 +8,13 @@ import me.ChristopherW.core.ObjectLoader;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Model;
 import me.ChristopherW.core.entity.Texture;
+import me.ChristopherW.core.utils.Transformation;
 import me.ChristopherW.core.utils.Utils;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,11 +36,17 @@ public class CourseManager {
         for(int holeID = 0; holeID < holes.size(); holeID++) {
             Hole hole = holes.get(holeID);
             if(holeID > 0) {
-                Vector3f prevLoc = new Vector3f(holes.get(holeID - 1).getPosition());
+                Matrix4f rotationMatrix = Transformation.createRotationMatrix(vectorRotationLookup.get(holes.get(holeID).getHoleDirection().toString()));
+                Hole prevHole = holes.get(holeID - 1);
+                Vector3f prevLoc = new Vector3f(prevHole.getHolePosition().x, prevHole.getPosition().y, prevHole.getHolePosition().z);
                 Vector3f holeDir = new Vector3f(holes.get(holeID).getHoleDirection());
-                Vector3f newLoc = prevLoc.add(holeDir.mul(30).add(new Vector3f(holes.get(holeID - 1).getHoleDirection()).mul(-5)));
+                Vector3f newLoc = prevLoc.add(holeDir.mul(10).add(new Vector3f(prevHole.getHoleDirection())));
                 hole.setPosition(newLoc);
                 hole.setStartPos(new Vector3f(newLoc.x + holes.get(holeID).getHoleDirection().x, hole.getStartPos().y, newLoc.z + holes.get(holeID).getHoleDirection().z));
+                Vector4f newHoleRot = new Vector4f(hole.getHolePosition(), 1);
+                newHoleRot.mul(rotationMatrix);
+                hole.setHolePosition(new Vector3f(newHoleRot.x, newHoleRot.y, newHoleRot.z));
+                hole.getHolePosition().add(newLoc);
             }
             hole.setRotation(vectorRotationLookup.get(holes.get(holeID).getHoleDirection().toString()));
             holeEntities.put("Ground_" + holeID, hole.getGroundEntity());
@@ -64,17 +74,20 @@ public class CourseManager {
         HashMap<String, Entity> ballEntities = new HashMap<>();
         for(int i = 0; i < balls.size(); i++) {
             GolfBall ball = balls.get(i);
+            for(int holeID = 0; holeID < holes.size(); holeID++) {
+                ball.setScore(holeID, 0);
+            }
             ballEntities.put("Ball_" + i, ball);
         }
         return ballEntities;
     }
 
-    public void AddBall(Texture texture, ObjectLoader loader, PhysicsSpace space) {
+    public GolfBall AddBall(Color color, Texture texture, ObjectLoader loader, PhysicsSpace space) {
         Model ballModel = loader.loadModel("assets/models/ball.obj");
         ballModel.getMaterial().setTexture(texture);
         ballModel.getMaterial().setReflectability(0f);
         float ballScale = 0.0795f;
-        GolfBall ballEntity = new GolfBall(ballModel, new Vector3f(0,0.4f,-1f), new Vector3f(0,0,0), ballScale);
+        GolfBall ballEntity = new GolfBall(ballModel, new Vector3f(0,0.4f,-1f), new Vector3f(0,0,0), new Vector3f(ballScale, ballScale, ballScale), color, space);
         CollisionShape ballShape = new SphereCollisionShape(ballScale);
         float ballMass = 1f;
         PhysicsRigidBody ballRigidBody = new PhysicsRigidBody(ballShape, ballMass);
@@ -84,9 +97,9 @@ public class CourseManager {
         ballRigidBody.setCcdSweptSphereRadius(0.01f);
         ballEntity.setRigidBody(ballRigidBody);
         balls.add(ballEntity);
-        space.addCollisionObject(ballRigidBody);
         if(balls.size() == 1)
             activeBall = balls.get(0);
+        return ballEntity;
     }
     public GolfBall GetBall(int id) {
         return balls.get(id);
@@ -103,5 +116,13 @@ public class CourseManager {
             activeBall = balls.get(0);
         else
             activeBall = balls.get(ballID + 1);
+    }
+
+    public ArrayList<GolfBall> GetBalls() {
+        return balls;
+    }
+
+    public int GetBallID(GolfBall getActiveBall) {
+        return balls.indexOf(getActiveBall);
     }
 }

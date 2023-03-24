@@ -1,6 +1,7 @@
 package me.ChristopherW.core.entity;
 
 public class Model {
+    private String path = "generated";
     private int id;
     private int vertexCount;
     private Material material;
@@ -19,6 +20,18 @@ public class Model {
         this.id = id;
         this.vertexCount = vertexCount;
         this.material = new Material(texture);
+    }
+    public Model(int id, int vertexCount, Texture texture, String path) {
+        this.id = id;
+        this.vertexCount = vertexCount;
+        this.material = new Material(texture);
+        this.path = path;
+    }
+    public Model(int id, int vertexCount, String path) {
+        this.id = id;
+        this.vertexCount = vertexCount;
+        this.material = new Material();
+        this.path = path;
     }
 
     public Model(Model model, Material material) {
@@ -80,5 +93,13 @@ public class Model {
 
     public void setIndicies(int[] indicies) {
         this.indicies = indicies;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

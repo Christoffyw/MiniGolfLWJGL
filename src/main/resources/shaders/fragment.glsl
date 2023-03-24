@@ -19,14 +19,19 @@ uniform Material material;
 uniform sampler2D textureSampler;
 
 void main() {
-    vec3 lightColor = vec3(1,1,1);
+    vec4 lightColor = vec4(1,1,1,1);
 
     float ambient = 0.5f;
 
     vec3 normal = normalize(fragNormal);
 
-    float diffuse = max(dot(normal, lightVec), 0.0f);
+    float diffuse = max(dot(normal, lightVec), 0.4f);
 
-    vec3 result = texture(textureSampler, fragTextureCoord).xyz * lightColor * (diffuse + ambient);
-    fragColor = vec4(result, 1.0);
+    vec4 textureColor = texture(textureSampler, fragTextureCoord);
+    if(textureColor.a < 0.5) {
+        discard;
+    }
+
+    vec4 result = textureColor * lightColor * (diffuse + ambient);
+    fragColor = result;
 }

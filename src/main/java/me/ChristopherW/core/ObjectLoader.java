@@ -17,13 +17,19 @@ import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 import static org.lwjgl.assimp.Assimp.*;
 import static org.lwjgl.assimp.Assimp.aiProcess_PreTransformVertices;
@@ -33,12 +39,12 @@ public class ObjectLoader {
     private List<Integer> vbos = new ArrayList<>();
     private List<Integer> textures = new ArrayList<>();
 
-    public IndexedMesh loadIndexedMesh(Model model, float scale) {
+    public IndexedMesh loadIndexedMesh(Model model, Vector3f scale) {
 
         com.jme3.math.Vector3f[] verticiesArr = new com.jme3.math.Vector3f[model.getVertices().length / 3];
         for(int i = 0; i < model.getVertices().length; i += 3) {
             Vector3f vertex = new Vector3f(model.getVertices()[i], model.getVertices()[i + 1], model.getVertices()[i + 2]);
-            verticiesArr[i / 3] = new com.jme3.math.Vector3f(vertex.x * scale, vertex.y * scale, vertex.z * scale);
+            verticiesArr[i / 3] = new com.jme3.math.Vector3f(vertex.x * scale.x, vertex.y * scale.y, vertex.z * scale.z);
         }
         return new IndexedMesh(verticiesArr, model.getIndicies());
     }
@@ -49,20 +55,37 @@ public class ObjectLoader {
         unbind();
         return id;
     }
-    public Model loadModel(float[] vertices, float[] textureCoords, float[] normals, int[] indicies, Texture texture) {
+    public Model loadModel(float[] vertices, float[] textureCoords, float[] normals, int[] indicies, Texture texture, String path) {
         int id = createVAO();
         storeInticiesBuffer(indicies);
         storeDataInAttribList(0, 3, vertices);
         storeDataInAttribList(1, 2, textureCoords);
         storeDataInAttribList(2, 3, normals);
         unbind();
-        Model model = new Model(id, indicies.length);
+        Model model = new Model(id, indicies.length, path);
         model.setVertices(vertices);
         model.setTextureCoords(textureCoords);
         model.setNormals(normals);
         model.setIndicies(indicies);
         model.getMaterial().setTexture(texture);
         return model;
+    }
+    public Vector3f getHoleLocation(Model model) {
+        Vector3f holePosition = new Vector3f(0,0,0);
+        String modelPath = model.getPath();
+        try {
+            Scanner scanner = new Scanner(new File(modelPath));
+            while(scanner.hasNext()) {
+                String line = scanner.nextLine();
+                String[] tokens = line.split(" ");
+                if(tokens[0].equalsIgnoreCase("h")) {
+                    holePosition = new Vector3f(Float.parseFloat(tokens[1]),Float.parseFloat(tokens[2]),Float.parseFloat(tokens[3]));
+                }
+            }
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return holePosition;
     }
     public Model loadModel(String modelPath) {
         return loadModel(modelPath, TestGame.defaultTexture);
@@ -95,14 +118,14 @@ public class ObjectLoader {
                 int numElements = (vertices.length / 3) * 2;
                 textCoords = new float[numElements];
             }
-            return loadModel(vertices, textCoords, normals, indices, texture);
+            return loadModel(vertices, textCoords, normals, indices, texture, modelPath);
         }
 
         return null;
     }
 
     private Model loadModel(float[] vertices, float[] textCoords, float[] normals, int[] indices) {
-        return loadModel(vertices, textCoords, normals, indices, TestGame.defaultTexture);
+        return loadModel(vertices, textCoords, normals, indices, TestGame.defaultTexture, "");
     }
 
     private static float[] processNormals(AIMesh aiMesh) {
@@ -156,6 +179,52 @@ public class ObjectLoader {
             data[pos++] = textCoord.z();
         }
         return data;
+    }
+
+    public int loadTextureColor(Color color) {
+        int width = 16, height = 16;
+        try {
+            BufferedImage img = ImageIO.read(new File("assets/textures/DefaultTexture.png"));
+            // Obtain the Graphics2D context associated with the BufferedImage.
+            Graphics2D g = img.createGraphics();
+
+            g.setColor(color);
+            g.fillRect(0, 0, width, height);
+
+            // Clean up -- dispose the graphics context that was created.
+            ImageIO.write(img, "png", new File("assets/textures/temp.png"));
+            g.dispose();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        ByteBuffer buffer;
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer c = stack.mallocInt(1);
+
+            buffer = STBImage.stbi_load("assets/textures/temp.png", w, h, c, 4);
+            if(buffer == null)
+                throw new Exception("Texture file" + "assets/textures/temp.png" + " not loaded. " + STBImage.stbi_failure_reason());
+
+            width = w.get();
+            height = h.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        int id = GL11.glGenTextures();
+        textures.add(id);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
+        GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_BASE_LEVEL, 0);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, 0);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+
+        GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+        return id;
     }
 
     public int loadTexture(String file) throws Exception {

@@ -1,7 +1,12 @@
 package me.ChristopherW.core;
 
+import imgui.ImGui;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
+import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.utils.Constants;
 import org.joml.Matrix4f;
+import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -10,6 +15,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
 public class WindowManager {
+    public final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
+    public final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+    public GUIManager guiManager;
+    private String glslVersion = null;
     private String title;
 
     private int width, height;
@@ -25,6 +34,7 @@ public class WindowManager {
         this.height = height;
         this.vSync = vSync;
         projectionMatrix = new Matrix4f();
+        guiManager = new GUIManager();
     }
 
     public boolean isResize() {
@@ -35,17 +45,19 @@ public class WindowManager {
         this.resize = resize;
     }
 
-    public void init() {
+    private void initWindow() {
         GLFWErrorCallback.createPrint(System.err).set();
 
         if(!GLFW.glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
 
+        glslVersion = "#version 430";
+
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GL11.GL_TRUE);
-        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GL11.GL_TRUE);
 
@@ -82,8 +94,8 @@ public class WindowManager {
         });
 
         GLFW.glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-           if(key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE)
-               GLFW.glfwSetWindowShouldClose(window, true);
+            if(key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE)
+                GLFW.glfwSetWindowShouldClose(window, true);
         });
 
 
@@ -103,12 +115,29 @@ public class WindowManager {
         GL11.glCullFace(GL11.GL_BACK);
     }
 
+    private void initImGui() {
+        ImGui.createContext();
+        guiManager.init();
+    }
+
+    public void init() {
+        initWindow();
+        initImGui();
+        imGuiGlfw.init(window, true);
+        imGuiGl3.init(glslVersion);
+    }
+
+
+
     public void update() {
         GLFW.glfwSwapBuffers(window);
         GLFW.glfwPollEvents();
     }
 
     public void cleanup() {
+        imGuiGl3.dispose();
+        imGuiGlfw.dispose();
+        ImGui.destroyContext();
         GLFW.glfwDestroyWindow(window);
     }
 

@@ -16,6 +16,7 @@ public class Hole {
     private Vector3f rotation;
     private Vector3f startPos;
     private Vector3f holeDirection;
+    private Vector3f holePosition;
     private Entity groundEntity;
     private Entity wallEntity;
     public Hole(Vector3f holeDirection, Model groundModel, Model wallModel, ObjectLoader loader, PhysicsSpace space) {
@@ -23,16 +24,18 @@ public class Hole {
         this.position = new Vector3f(0,0,0);
         this.rotation = new Vector3f(0,0,0);
         this.holeDirection = holeDirection;
-        groundEntity = new Entity(groundModel, new Vector3f(0,0,0), new Vector3f(0,0,0), 1);
-        IndexedMesh golfGroundMesh = loader.loadIndexedMesh(groundModel, 1);
+        this.holePosition = loader.getHoleLocation(groundModel);
+        groundEntity = new Entity(groundModel, new Vector3f(0,0,0), new Vector3f(0,0,0), new Vector3f(1,1,1), space);
+        IndexedMesh golfGroundMesh = loader.loadIndexedMesh(groundModel, new Vector3f(1,1,1));
         CollisionShape golfGroundShape = new GImpactCollisionShape(golfGroundMesh);
+        golfGroundShape.setMargin(0.00001f);
         PhysicsRigidBody golfGroundPhysicsObject = new PhysicsRigidBody(golfGroundShape, 0);
         golfGroundPhysicsObject.setPhysicsLocation(Utils.convert(groundEntity.getPosition()));
         golfGroundPhysicsObject.setRestitution(0);
         groundEntity.setRigidBody(golfGroundPhysicsObject);
 
-        wallEntity = new Entity(wallModel, new Vector3f(0,0,0), new Vector3f(0,0,0), 1);
-        IndexedMesh wallMesh = loader.loadIndexedMesh(wallModel, 1);
+        wallEntity = new Entity(wallModel, new Vector3f(0,0,0), new Vector3f(0,0,0), new Vector3f(1,1,1), space);
+        IndexedMesh wallMesh = loader.loadIndexedMesh(wallModel, new Vector3f(1,1,1));
         CollisionShape wallShape = new GImpactCollisionShape(wallMesh);
         wallShape.setMargin(0.00001f);
         PhysicsRigidBody golfPhysicsObject = new PhysicsRigidBody(wallShape, 0);
@@ -53,6 +56,14 @@ public class Hole {
 
     public void setStartPos(Vector3f startPos) {
         this.startPos = startPos;
+    }
+
+    public Vector3f getHolePosition() {
+        return holePosition;
+    }
+
+    public void setHolePosition(Vector3f holePosition) {
+        this.holePosition = holePosition;
     }
 
     public Vector3f getPosition() {
