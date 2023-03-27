@@ -6,11 +6,12 @@ import org.joml.Vector4f;
 import java.awt.*;
 
 public class Constants {
-    public static final String title = "GAME TEST";
+    public static final String TITLE = "Minigolf";
+    public static final String ICON_PATH = "assets/textures/icons/Ball_1.png";
     public static final Vector4f BG_COLOR = new Vector4f(0.53f, 0.81f,0.92f, 1f);
 
     public static final float GRAVITY = -39.2f;
-    public static final boolean FULLSCREEN = true;
+    public static final boolean FULLSCREEN = false;
     public static final int WIDTH = 1280, HEIGHT = 720;
     public static final float FRAMERATE = 999; // ABOVE 999, PHYSICS BREAKS
     public static final boolean VSYNC = true;

@@ -128,10 +128,10 @@ public class TestGame implements ILogic {
 
         rotation -= input.getDisplVec().y * Constants.MOUSE_SENSITIVITY * deltaTime;
         if(window.isKeyPressed(GLFW.GLFW_KEY_UP)) {
-            radius = Utils.clamp(radius -= 0.0125f, 1, 100);
+            radius = Utils.clamp(radius -= deltaTime, 1, 100);
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_DOWN)) {
-            radius = Utils.clamp(radius += 0.0125f, 1, 100);
+            radius = Utils.clamp(radius += deltaTime, 1, 100);
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) {
             activeBall.setPosition(courseManager.GetHole(activeBall.getCurrentHoleID()).getStartPos());
@@ -229,6 +229,8 @@ public class TestGame implements ILogic {
                 if(ball.getCurrentHoleID() < courseManager.GetHoleCount() - 1) {
                     ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
                     ball.setPosition(courseManager.GetHole(ball.getCurrentHoleID()).getStartPos());
+                    ball.setEnabled(false);
+                    ball.setFirstShot(true);
                 }
                 window.guiManager.setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
                 window.guiManager.setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));

@@ -32,7 +32,7 @@ public class Launcher{
         NativeLibraryLoader.loadLibbulletjme(true, new File("natives/"), "Release", "Sp");
         NativeLibrary.setStartupMessageEnabled(false);
         NativeLibrary.logger.setLevel(Level.OFF);
-        window = new WindowManager(Constants.title, Constants.WIDTH, Constants.HEIGHT, Constants.VSYNC);
+        window = new WindowManager(Constants.TITLE, Constants.WIDTH, Constants.HEIGHT, Constants.VSYNC);
         game = new TestGame();
         EngineManager engine = new EngineManager();
 

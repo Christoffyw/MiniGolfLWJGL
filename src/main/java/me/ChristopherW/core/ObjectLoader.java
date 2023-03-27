@@ -5,14 +5,13 @@ import me.ChristopherW.core.entity.Model;
 import me.ChristopherW.core.entity.Texture;
 import me.ChristopherW.core.utils.Utils;
 import me.ChristopherW.test.TestGame;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AIMesh;
 import org.lwjgl.assimp.AIScene;
 import org.lwjgl.assimp.AIVector3D;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
@@ -22,12 +21,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -227,6 +224,27 @@ public class ObjectLoader {
         return id;
     }
 
+    public GLFWImage loadtextureBuffer(String iconPath) {
+        int width, height;
+        ByteBuffer buffer;
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer c = stack.mallocInt(1);
+
+            buffer = STBImage.stbi_load(iconPath, w, h, c, 4);
+            if(buffer == null)
+                throw new Exception("Texture file " + iconPath + " not loaded. " + STBImage.stbi_failure_reason());
+
+            width = w.get();
+            height = h.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        GLFWImage image = GLFWImage.malloc();
+        image.set(width, height, buffer);
+        return image;
+    }
     public int loadTexture(String file) throws Exception {
         int width, height;
         ByteBuffer buffer;

@@ -1,11 +1,7 @@
 package me.ChristopherW.core;
 
-import imgui.ImGui;
-import imgui.flag.ImGuiConfigFlags;
-import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.utils.Constants;
 import me.ChristopherW.test.Launcher;
-import me.ChristopherW.test.TestGame;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
@@ -65,7 +61,7 @@ public class EngineManager {
 
                 if(frameCounter >= NANOSECOND) {
                     setFps(frames);
-                    window.setTitle(Constants.title + " - FPS: " + getFps());
+                    window.setTitle(Constants.TITLE + " - FPS: " + getFps());
                     frames = 0;
                     frameCounter = 0;
                 }

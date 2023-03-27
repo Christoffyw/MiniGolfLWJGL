@@ -6,12 +6,8 @@ import imgui.glfw.ImGuiImplGlfw;
 import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.utils.Constants;
 import org.joml.Matrix4f;
-import org.lwjgl.glfw.Callbacks;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.glfw.*;
+import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
 
 public class WindowManager {
@@ -54,6 +50,7 @@ public class WindowManager {
         glslVersion = "#version 430";
 
         GLFW.glfwDefaultWindowHints();
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GL11.GL_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GL11.GL_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -63,10 +60,6 @@ public class WindowManager {
 
         long monitor = GLFW.glfwGetPrimaryMonitor();
         GLFWVidMode mode = GLFW.glfwGetVideoMode(monitor);
-        GLFW.glfwWindowHint(GLFW.GLFW_RED_BITS, mode.redBits());
-        GLFW.glfwWindowHint(GLFW.GLFW_GREEN_BITS, mode.greenBits());
-        GLFW.glfwWindowHint(GLFW.GLFW_BLUE_BITS, mode.blueBits());
-        GLFW.glfwWindowHint(GLFW.GLFW_REFRESH_RATE, mode.refreshRate());
 
 
         boolean maximized = false;
@@ -98,7 +91,10 @@ public class WindowManager {
                 GLFW.glfwSetWindowShouldClose(window, true);
         });
 
-
+        ObjectLoader loader = new ObjectLoader();
+        GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
+        imagebf.put(0, loader.loadtextureBuffer(Constants.ICON_PATH));
+        GLFW.glfwSetWindowIcon(window, imagebf);
         GLFW.glfwMakeContextCurrent(window);
 
         if(isvSync())
@@ -112,6 +108,7 @@ public class WindowManager {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glEnable(GL11.GL_STENCIL_TEST);
         GL11.glEnable(GL11.GL_CULL_FACE);
+        GL11.glEnable(GL43.GL_DEBUG_OUTPUT);
         GL11.glCullFace(GL11.GL_BACK);
     }
 
