@@ -23,6 +23,8 @@ public class CourseManager {
     HashMap<String, Vector3f> vectorRotationLookup = new HashMap<>();
     ArrayList<Hole> holes = new ArrayList<>();
     ArrayList<GolfBall> balls = new ArrayList<GolfBall>();
+    public ArrayList<Integer> currentBalls;
+    public ArrayList<Integer> finishedBalls;
     GolfBall activeBall = null;
     public CourseManager() {
         vectorRotationLookup.put(new Vector3f(0,0,1).toString(), new Vector3f(0,180,0));
@@ -72,13 +74,17 @@ public class CourseManager {
 
     public HashMap<String, Entity> InitBalls() {
         HashMap<String, Entity> ballEntities = new HashMap<>();
+        currentBalls = new ArrayList<>();
+        finishedBalls = new ArrayList<>();
         for(int i = 0; i < balls.size(); i++) {
             GolfBall ball = balls.get(i);
             for(int holeID = 0; holeID < holes.size(); holeID++) {
                 ball.setScore(holeID, 0);
             }
+            currentBalls.add(i);
             ballEntities.put("Ball_" + i, ball);
         }
+
         return ballEntities;
     }
 
@@ -107,15 +113,36 @@ public class CourseManager {
     public int GetBallCount() {
         return balls.size();
     }
+    public void SetActiveBall(GolfBall activeBall) {
+        this.activeBall = activeBall;
+    }
     public GolfBall GetActiveBall() {
         return activeBall;
     }
     public void NextBall() {
         int ballID = balls.indexOf(activeBall);
-        if(ballID == balls.size() - 1)
-            activeBall = balls.get(0);
+        System.out.println("NEXET BALL");
+        if(currentBalls.size() == 0) {
+            for(int i = 0; i < finishedBalls.size(); i++) {
+                currentBalls.add(finishedBalls.get(i));
+            }
+            activeBall = balls.get(currentBalls.get(0));
+            return;
+        }
+
+        if (currentBalls.indexOf(ballID) == currentBalls.size() - 1)
+            activeBall = balls.get(currentBalls.get(0));
         else
-            activeBall = balls.get(ballID + 1);
+            activeBall = balls.get(currentBalls.get(currentBalls.indexOf(ballID) + 1));
+        System.out.println("ball is: " + balls.indexOf(activeBall));
+    }
+
+    public void BallFinish(GolfBall ball) {
+        System.out.println("ball color: " + ball.getColor());
+        System.out.println("ball id: " + balls.indexOf(ball));
+        System.out.println(currentBalls);
+        finishedBalls.add(currentBalls.get(currentBalls.indexOf(balls.indexOf(ball))));
+        currentBalls.remove(currentBalls.get(currentBalls.indexOf(balls.indexOf(ball))));
     }
 
     public ArrayList<GolfBall> GetBalls() {

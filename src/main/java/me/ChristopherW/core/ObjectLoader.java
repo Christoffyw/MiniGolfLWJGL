@@ -4,7 +4,7 @@ import com.jme3.bullet.collision.shapes.infos.IndexedMesh;
 import me.ChristopherW.core.entity.Model;
 import me.ChristopherW.core.entity.Texture;
 import me.ChristopherW.core.utils.Utils;
-import me.ChristopherW.test.TestGame;
+import me.ChristopherW.test.Game;
 import org.joml.Vector3f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.AIFace;
@@ -85,7 +85,7 @@ public class ObjectLoader {
         return holePosition;
     }
     public Model loadModel(String modelPath) {
-        return loadModel(modelPath, TestGame.defaultTexture);
+        return loadModel(modelPath, Game.defaultTexture);
     }
     public Model loadModel(String modelPath, Texture texture) {
         File file = new File(modelPath);
@@ -122,7 +122,7 @@ public class ObjectLoader {
     }
 
     private Model loadModel(float[] vertices, float[] textCoords, float[] normals, int[] indices) {
-        return loadModel(vertices, textCoords, normals, indices, TestGame.defaultTexture, "");
+        return loadModel(vertices, textCoords, normals, indices, Game.defaultTexture, "");
     }
 
     private static float[] processNormals(AIMesh aiMesh) {

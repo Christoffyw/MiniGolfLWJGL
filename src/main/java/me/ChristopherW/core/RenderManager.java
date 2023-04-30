@@ -2,22 +2,15 @@ package me.ChristopherW.core;
 
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Model;
-import me.ChristopherW.core.utils.Constants;
 import me.ChristopherW.core.utils.Transformation;
-import me.ChristopherW.core.utils.Utils;
-import me.ChristopherW.lighting.DirectionalLight;
-import me.ChristopherW.lighting.PointLight;
-import me.ChristopherW.lighting.SpotLight;
 import me.ChristopherW.test.Launcher;
-import me.ChristopherW.test.TestGame;
+import me.ChristopherW.test.Game;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +48,7 @@ public class RenderManager {
         if(model.getMaterial().hasTexture()) {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getMaterial().getTexture().getId());
         } else {
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, TestGame.defaultTexture.getId());
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, Game.defaultTexture.getId());
         }
     }
 

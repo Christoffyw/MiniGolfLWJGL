@@ -17,8 +17,8 @@ public class Launcher{
     private static WindowManager window;
 
 
-    private static TestGame game;
-    public static TestGame getGame() {
+    private static Game game;
+    public static Game getGame() {
         return game;
     }
 
@@ -33,7 +33,7 @@ public class Launcher{
         NativeLibrary.setStartupMessageEnabled(false);
         NativeLibrary.logger.setLevel(Level.OFF);
         window = new WindowManager(Constants.TITLE, Constants.WIDTH, Constants.HEIGHT, Constants.VSYNC);
-        game = new TestGame();
+        game = new Game();
         EngineManager engine = new EngineManager();
 
 

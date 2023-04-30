@@ -5,12 +5,13 @@ import me.ChristopherW.test.Launcher;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
+
 public class EngineManager {
     public static final long NANOSECOND = 1000000000L;
 
     private static int fps;
-    private static int tps;
-    private static float frametime = 1.0f / Constants.FRAMERATE;
+    private static float frametime;
 
     private boolean isRunning;
 
@@ -31,6 +32,7 @@ public class EngineManager {
     
     public void start() throws Exception {
         init();
+        frametime = 1.0f / Constants.FRAMERATE;
         if(isRunning)
             return;
         run();
@@ -68,9 +70,10 @@ public class EngineManager {
             }
 
             if(render) {
-                update(frametime);
-                render();
+                double time = glfwGetTime();
 
+                update(getFps() == 0 ? 0 : 1f / getFps());
+                render();
 
                 input(getFps() == 0 ? 0 : 1f / getFps(), totalFrames);
                 frames++;
@@ -113,12 +116,5 @@ public class EngineManager {
 
     public static void setFps(int fps) {
         EngineManager.fps = fps;
-    }
-    public static int getTps() {
-        return tps;
-    }
-
-    public static void setTps(int tps) {
-        EngineManager.tps = tps;
     }
 }

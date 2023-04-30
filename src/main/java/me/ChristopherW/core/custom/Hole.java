@@ -20,7 +20,10 @@ public class Hole {
     private Entity groundEntity;
     private Entity wallEntity;
     public Hole(Vector3f holeDirection, Model groundModel, Model wallModel, ObjectLoader loader, PhysicsSpace space) {
-        this.startPos = new Vector3f(0, 0.4f, -1);
+        this(0, holeDirection, groundModel, wallModel, loader, space);
+    }
+    public Hole(float startHeightOffset, Vector3f holeDirection, Model groundModel, Model wallModel, ObjectLoader loader, PhysicsSpace space) {
+        this.startPos = new Vector3f(0, 0.4f + startHeightOffset, -1);
         this.position = new Vector3f(0,0,0);
         this.rotation = new Vector3f(0,0,0);
         this.holeDirection = holeDirection;

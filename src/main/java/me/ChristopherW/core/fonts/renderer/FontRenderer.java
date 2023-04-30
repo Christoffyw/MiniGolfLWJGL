@@ -3,7 +3,6 @@ package me.ChristopherW.core.fonts.renderer;
 import me.ChristopherW.core.ShaderManager;
 import me.ChristopherW.core.fonts.loader.FontType;
 import me.ChristopherW.core.fonts.loader.GUIText;
-import me.ChristopherW.test.TestGame;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;

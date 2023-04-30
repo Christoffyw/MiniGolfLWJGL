@@ -67,6 +67,10 @@ public class WindowManager {
             width = mode.width();
             height = mode.height();
             GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_TRUE);
+            GLFW.glfwWindowHint(GLFW.GLFW_RED_BITS, mode.redBits());
+            GLFW.glfwWindowHint(GLFW.GLFW_GREEN_BITS, mode.greenBits());
+            GLFW.glfwWindowHint(GLFW.GLFW_BLUE_BITS, mode.blueBits());
+            GLFW.glfwWindowHint(GLFW.GLFW_REFRESH_RATE, mode.refreshRate());
             maximized = true;
         }
         if(maximized) {
@@ -97,8 +101,11 @@ public class WindowManager {
         GLFW.glfwSetWindowIcon(window, imagebf);
         GLFW.glfwMakeContextCurrent(window);
 
-        if(isvSync())
+        if(vSync) {
             GLFW.glfwSwapInterval(1);
+            Constants.FRAMERATE = mode.refreshRate();
+        }
+
 
         GLFW.glfwShowWindow(window);
 
