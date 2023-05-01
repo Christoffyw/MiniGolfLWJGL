@@ -8,7 +8,9 @@ import me.ChristopherW.core.utils.Constants;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
+import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.rpmalloc.RPmallocThreadStatistics.size_use;
 
 public class WindowManager {
     public final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
@@ -110,6 +112,8 @@ public class WindowManager {
         GLFW.glfwShowWindow(window);
 
         GL.createCapabilities();
+
+        //Callback glDebugCallback = GLUtil.setupDebugMessageCallback();
 
         GL11.glClearColor(0f,0f,0f,0f);
         GL11.glEnable(GL11.GL_DEPTH_TEST);

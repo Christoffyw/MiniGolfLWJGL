@@ -33,5 +33,5 @@ void main() {
     }
 
     vec4 result = textureColor * lightColor * (diffuse + ambient);
-    fragColor = result;
+    fragColor = vec4(fragTextureCoord.x + 0.5, 0.0, fragTextureCoord.y+0.5,1.0);
 }
