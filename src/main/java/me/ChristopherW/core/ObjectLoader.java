@@ -19,8 +19,11 @@ import org.lwjgl.system.MemoryStack;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -101,23 +104,34 @@ public class ObjectLoader {
             throw new RuntimeException("Error loading model [modelPath: " + modelPath + "]");
         }
 
-        int numMeshes = aiScene.mNumMeshes();
-        PointerBuffer aiMeshes = aiScene.mMeshes();
-        for (int i = 0; i < numMeshes; i++) {
-            AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
-            float[] vertices = processVertices(aiMesh);
-            float[] normals = processNormals(aiMesh);
-            float[] textCoords = processTextCoords(aiMesh);
-            int[] indices = processIndices(aiMesh);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("assets/models/" + modelPath.split("/")[2] + ".txt"));
+            System.out.println(modelPath.split("/")[2]);
+            int numMeshes = aiScene.mNumMeshes();
+            PointerBuffer aiMeshes = aiScene.mMeshes();
+            for (int i = 0; i < numMeshes; i++) {
+                AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
+                float[] vertices = processVertices(aiMesh);
+                float[] normals = processNormals(aiMesh);
+                float[] textCoords = processTextCoords(aiMesh);
+                writer.write("New Mesh (" + modelPath + ")) \n");
+                for(int x = 0; x < textCoords.length; x++) {
+                    writer.write(Float.toString(textCoords[x]) + "\n");
+                }
+                int[] indices = processIndices(aiMesh);
 
-            // Texture coordinates may not have been populated. We need at least the empty slots
-            if (textCoords.length == 0) {
-                int numElements = (vertices.length / 3) * 2;
-                textCoords = new float[numElements];
+                // Texture coordinates may not have been populated. We need at least the empty slots
+                if (textCoords.length == 0) {
+                    int numElements = (vertices.length / 3) * 2;
+                    textCoords = new float[numElements];
+                }
+                
+                writer.close();
+                return loadModel(vertices, textCoords, normals, indices, texture, modelPath);
             }
-            return loadModel(vertices, textCoords, normals, indices, texture, modelPath);
+        } catch(Exception e) {
+            e.printStackTrace();
         }
-
         return null;
     }
 
@@ -170,10 +184,10 @@ public class ObjectLoader {
         float[] data = new float[buffer.remaining() * 3];
         int pos = 0;
         while (buffer.remaining() > 0) {
-            AIVector3D textCoord = buffer.get();
-            data[pos++] = textCoord.x();
-            data[pos++] = textCoord.y();
-            data[pos++] = textCoord.z();
+            AIVector3D vertice = buffer.get();
+            data[pos++] = vertice.x();
+            data[pos++] = vertice.y();
+            data[pos++] = vertice.z();
         }
         return data;
     }
