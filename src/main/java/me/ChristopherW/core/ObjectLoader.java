@@ -103,34 +103,21 @@ public class ObjectLoader {
         if (aiScene == null) {
             throw new RuntimeException("Error loading model [modelPath: " + modelPath + "]");
         }
+        int numMeshes = aiScene.mNumMeshes();
+        PointerBuffer aiMeshes = aiScene.mMeshes();
+        for (int i = 0; i < numMeshes; i++) {
+            AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
+            float[] vertices = processVertices(aiMesh);
+            float[] normals = processNormals(aiMesh);
+            float[] textCoords = processTextCoords(aiMesh);
+            int[] indices = processIndices(aiMesh);
 
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("assets/models/" + modelPath.split("/")[2] + ".txt"));
-            System.out.println(modelPath.split("/")[2]);
-            int numMeshes = aiScene.mNumMeshes();
-            PointerBuffer aiMeshes = aiScene.mMeshes();
-            for (int i = 0; i < numMeshes; i++) {
-                AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
-                float[] vertices = processVertices(aiMesh);
-                float[] normals = processNormals(aiMesh);
-                float[] textCoords = processTextCoords(aiMesh);
-                writer.write("New Mesh (" + modelPath + ")) \n");
-                for(int x = 0; x < textCoords.length; x++) {
-                    writer.write(Float.toString(textCoords[x]) + "\n");
-                }
-                int[] indices = processIndices(aiMesh);
-
-                // Texture coordinates may not have been populated. We need at least the empty slots
-                if (textCoords.length == 0) {
-                    int numElements = (vertices.length / 3) * 2;
-                    textCoords = new float[numElements];
-                }
-                
-                writer.close();
-                return loadModel(vertices, textCoords, normals, indices, texture, modelPath);
+            // Texture coordinates may not have been populated. We need at least the empty slots
+            if (textCoords.length == 0) {
+                int numElements = (vertices.length / 3) * 2;
+                textCoords = new float[numElements];
             }
-        } catch(Exception e) {
-            e.printStackTrace();
+            return loadModel(vertices, textCoords, normals, indices, texture, modelPath);
         }
         return null;
     }

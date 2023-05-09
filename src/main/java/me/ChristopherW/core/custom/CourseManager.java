@@ -53,6 +53,9 @@ public class CourseManager {
             hole.setRotation(vectorRotationLookup.get(holes.get(holeID).getHoleDirection().toString()));
             holeEntities.put("Ground_" + holeID, hole.getGroundEntity());
             holeEntities.put("Wall_" + holeID, hole.getWallEntity());
+            /*for(int i = 0; i < hole.getGroundEntity().getModel().getTextureCoords().length; i++) {
+                System.out.println(hole.getGroundEntity().getModel().getTextureCoords()[i]);
+            }*/
             //hole.getWallEntity().setEnabled(false);
         }
         return holeEntities;
