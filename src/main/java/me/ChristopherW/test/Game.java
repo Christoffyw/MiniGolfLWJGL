@@ -228,10 +228,10 @@ public class Game implements ILogic {
             if(ball.getPosition().distance(courseManager.GetHole(ball.getCurrentHoleID()).getHolePosition()) < 0.25f) {
                 ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
                 ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+                ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
                 if(ball.getCurrentHoleID() < courseManager.GetHoleCount() - 1) {
                     ball.setPosition(courseManager.GetHole(ball.getCurrentHoleID()).getStartPos());
                 }
-                ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
                 ball.setEnabled(false);
                 ball.setFirstShot(true);
                 System.out.println(courseManager.currentBalls);
