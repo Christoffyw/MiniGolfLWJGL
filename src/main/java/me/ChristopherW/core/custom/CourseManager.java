@@ -53,10 +53,6 @@ public class CourseManager {
             hole.setRotation(vectorRotationLookup.get(holes.get(holeID).getHoleDirection().toString()));
             holeEntities.put("Ground_" + holeID, hole.getGroundEntity());
             holeEntities.put("Wall_" + holeID, hole.getWallEntity());
-            /*for(int i = 0; i < hole.getGroundEntity().getModel().getTextureCoords().length; i++) {
-                System.out.println(hole.getGroundEntity().getModel().getTextureCoords()[i]);
-            }*/
-            //hole.getWallEntity().setEnabled(false);
         }
         return holeEntities;
     }
@@ -125,7 +121,6 @@ public class CourseManager {
     }
     public void NextBall() {
         int ballID = balls.indexOf(activeBall);
-        System.out.println("NEXET BALL");
         if(currentBalls.size() == 0) {
             for(int i = 0; i < finishedBalls.size(); i++) {
                 currentBalls.add(finishedBalls.get(i));
@@ -138,13 +133,9 @@ public class CourseManager {
             activeBall = balls.get(currentBalls.get(0));
         else
             activeBall = balls.get(currentBalls.get(currentBalls.indexOf(ballID) + 1));
-        System.out.println("ball is: " + balls.indexOf(activeBall));
     }
 
     public void BallFinish(GolfBall ball) {
-        System.out.println("ball color: " + ball.getColor());
-        System.out.println("ball id: " + balls.indexOf(ball));
-        System.out.println(currentBalls);
         finishedBalls.add(currentBalls.get(currentBalls.indexOf(balls.indexOf(ball))));
         currentBalls.remove(currentBalls.get(currentBalls.indexOf(balls.indexOf(ball))));
     }

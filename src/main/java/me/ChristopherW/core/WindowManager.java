@@ -49,16 +49,18 @@ public class WindowManager {
         if(!GLFW.glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
 
-        glslVersion = "#version 430";
+        glslVersion = "#version 410";
 
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GL11.GL_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GL11.GL_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
-        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 1);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GL11.GL_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_STENCIL_BITS, 4);
+        GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 4);
 
         long monitor = GLFW.glfwGetPrimaryMonitor();
         GLFWVidMode mode = GLFW.glfwGetVideoMode(monitor);

@@ -60,9 +60,7 @@ public class Game implements ILogic {
         Texture courseTexture4 = new Texture(loader.loadTexture("assets/textures/GolfCourse4.png"));
         Texture courseTexture5 = new Texture(loader.loadTexture("assets/textures/GolfCourse5.png"));
         Texture courseTexture6 = new Texture(loader.loadTexture("assets/textures/GolfCourse6.png"));
-        Texture shotMeterHeadTexture = new Texture(loader.loadTexture("assets/textures/Arrow.png"));
-        Texture shotMeterBaseTexture = new Texture(loader.loadTexture("assets/textures/ArrowBase.png"));
-        Texture ballTexture = new Texture(loader.loadTexture("assets/textures/GolfBall.png"));
+        Texture courseTexture7 = new Texture(loader.loadTexture("assets/textures/GolfCourse7.png"));
 
         entities = new HashMap<>();
 
@@ -72,9 +70,14 @@ public class Game implements ILogic {
         courseManager.AddHole(new Hole(new Vector3f(1, 0, 0), loader.loadModel("assets/models/ground4.obj", courseTexture4), loader.loadModel("assets/models/walls4.obj", courseTexture4), loader, physicsSpace));
         courseManager.AddHole(new Hole(new Vector3f(0, 0, 1), loader.loadModel("assets/models/ground5.obj", courseTexture5), loader.loadModel("assets/models/walls5.obj", courseTexture5), loader, physicsSpace));
         courseManager.AddHole(new Hole(2.1f, new Vector3f(-1, 0, 0), loader.loadModel("assets/models/ground6.obj", courseTexture6), loader.loadModel("assets/models/walls6.obj", courseTexture6), loader, physicsSpace));
-        courseManager.AddHole(new Hole(2.1f, new Vector3f(-1, 0, 0), loader.loadModel("assets/models/ground6.obj", courseTexture6), loader.loadModel("assets/models/walls6.obj", courseTexture6), loader, physicsSpace));
-
+        courseManager.AddHole(new Hole(new Vector3f(-1, 0, 0), loader.loadModel("assets/models/ground7.obj", courseTexture7), loader.loadModel("assets/models/walls7.obj", courseTexture7), loader, physicsSpace));
         entities.putAll(courseManager.InitHoles());
+    }
+
+    public void startGame() throws Exception {
+        Texture shotMeterHeadTexture = new Texture(loader.loadTexture("assets/textures/Arrow.png"));
+        Texture shotMeterBaseTexture = new Texture(loader.loadTexture("assets/textures/ArrowBase.png"));
+        Texture ballTexture = new Texture(loader.loadTexture("assets/textures/GolfBall.png"));
 
         for(int i = 0; i < Constants.PLAYER_COUNT; i++) {
             Color color = new Color(255,255,255);
@@ -116,8 +119,14 @@ public class Game implements ILogic {
     float friction = 1f;
     float rotation = 0;
     Vector3f start = null;
+    float timeOffset = 1.0f;
     @Override
     public void input(MouseInput input, double deltaTime, int frame) {
+
+        if(Constants.mainMenu) {
+            return;
+        }
+
         cameraInc.set(0,0,0);
         GolfBall activeBall = courseManager.GetActiveBall();
         Entity preview = entities.get("Preview");
@@ -130,10 +139,12 @@ public class Game implements ILogic {
             radius = Utils.clamp(radius += deltaTime * 10, 1, 100);
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) {
-            activeBall.setPosition(courseManager.GetHole(activeBall.getCurrentHoleID()).getStartPos());
-            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
-            activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+            timeOffset = 10.0f;
         }
+        else {
+            timeOffset = 1.0f;
+        }
+
         if(window.isKeyPressed(GLFW.GLFW_KEY_1))
             activeBall.teleportHole(0, courseManager, window);
         if(window.isKeyPressed(GLFW.GLFW_KEY_2))
@@ -146,6 +157,8 @@ public class Game implements ILogic {
             activeBall.teleportHole(4, courseManager, window);
         if(window.isKeyPressed(GLFW.GLFW_KEY_6))
             activeBall.teleportHole(5, courseManager, window);
+        if(window.isKeyPressed(GLFW.GLFW_KEY_7))
+            activeBall.teleportHole(6, courseManager, window);
 
         Entity shotMeterHead = entities.get("ShotmeterHead");
         Entity shotMeterBase = entities.get("ShotmeterBase");
@@ -158,7 +171,6 @@ public class Game implements ILogic {
                 activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
                 if(!courseManager.finishedBalls.contains(courseManager.GetBallID(activeBall)))
                     courseManager.NextBall();
-                System.out.println(courseManager.currentBalls);
                 activeBall = courseManager.GetActiveBall();
                 window.guiManager.setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
                 window.guiManager.setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
@@ -228,14 +240,14 @@ public class Game implements ILogic {
             if(ball.getPosition().distance(courseManager.GetHole(ball.getCurrentHoleID()).getHolePosition()) < 0.25f) {
                 ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
                 ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
-                ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
                 if(ball.getCurrentHoleID() < courseManager.GetHoleCount() - 1) {
+                    ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
                     ball.setPosition(courseManager.GetHole(ball.getCurrentHoleID()).getStartPos());
                 }
                 ball.setEnabled(false);
                 ball.setFirstShot(true);
-                System.out.println(courseManager.currentBalls);
-                courseManager.NextBall();
+                if(activeBall == ball)
+                    courseManager.NextBall();
                 if(!courseManager.finishedBalls.contains(courseManager.GetBalls().indexOf(ball)))
                     courseManager.BallFinish(ball);
                 if(courseManager.currentBalls.isEmpty()) {
@@ -263,20 +275,35 @@ public class Game implements ILogic {
                 entity.setPosition(Utils.convert(entity.getRigidBody().getPhysicsLocation(null)));
 
                 if(entity instanceof GolfBall)
-                    entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0)).mul((float) (1/deltaTime)));
+                    entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0)).mul((float) (5f/deltaTime)));
             }
         }
-        physicsSpace.update((float) deltaTime, 2);
+        physicsSpace.update((float) deltaTime * timeOffset, 2);
     }
     float radius = 7.5f;
+    float theta = 0.0f;
     @Override
     public void update(float inteveral, MouseInput mouseInput) {
-        Vector3f orbitVec = new Vector3f();
-        orbitVec.x = (float) (radius * Math.sin(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().x;
-        orbitVec.y = radius;
-        orbitVec.z = (float) (radius * Math.cos(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().z;
-        camera.setPosition(orbitVec);
-        camera.setRotation(30f, -rotation, camera.getRotation().z);
+        
+        if(!Constants.mainMenu) {
+            Vector3f orbitVec = new Vector3f();
+            orbitVec.x = (float) (radius * Math.sin(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().x;
+            orbitVec.y = radius;
+            orbitVec.z = (float) (radius * Math.cos(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().z;
+            camera.setPosition(orbitVec);
+            camera.setRotation(30f, -rotation, camera.getRotation().z);
+        } else {
+            float multiplier = 2.0f;
+            if(window.isKeyPressed(GLFW.GLFW_KEY_SPACE))
+                multiplier = 1000.0f;
+            Vector3f orbitVec = new Vector3f();
+            orbitVec.x = (float) (25 * Math.sin(Math.toRadians(theta))) + 20;
+            orbitVec.y = 25;
+            orbitVec.z = (float) (25 * Math.cos(Math.toRadians(theta))) - 20;
+            camera.setPosition(orbitVec);
+            camera.setRotation(30f, -theta, camera.getRotation().z);
+            theta += inteveral * multiplier;
+        }
 
         for(Entity entity : entities.values()) {
             if(entity.isVisible())

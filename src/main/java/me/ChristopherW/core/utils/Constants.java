@@ -1,9 +1,9 @@
 package me.ChristopherW.core.utils;
 
+import java.awt.Color;
+
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-
-import java.awt.*;
 
 public class Constants {
     public static final String TITLE = "Minigolf";
@@ -11,7 +11,7 @@ public class Constants {
     public static final Vector4f BG_COLOR = new Vector4f(0.53f, 0.81f,0.92f, 1f);
 
     public static final float GRAVITY = -39.2f;
-    public static final boolean FULLSCREEN = false;
+    public static final boolean FULLSCREEN = true;
     public static final int WIDTH = 1280, HEIGHT = 720;
     public static float FRAMERATE = 60; // ABOVE 999, PHYSICS BREAKS
     public static final boolean VSYNC = true;
@@ -23,7 +23,7 @@ public class Constants {
     public static final float MOUSE_SENSITIVITY_X = 5f;
     public static final float MOUSE_SENSITIVITY_Y = 0.25f;
 
-    public static final int PLAYER_COUNT = 3; // MAX 12
+    public static int PLAYER_COUNT = 2; // MAX 12
     public static boolean RANDOM_COLORS = false;
     public static Color[] DEFAULT_BALL_COLORS = {
         new Color(0,100,255),   // Blue
@@ -39,6 +39,8 @@ public class Constants {
         new Color(35,35,35),    // Black
         new Color(255,255,255)  // White
     };
+
+    public static boolean mainMenu = true;
 
     public static final Vector4f DEFAULT_COLOR = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
     public static final Vector3f AMBIENT_LIGHT = new Vector3f(0.3f ,0.3f, 0.3f);
