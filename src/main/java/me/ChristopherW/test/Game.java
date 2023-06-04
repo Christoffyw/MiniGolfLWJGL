@@ -119,7 +119,6 @@ public class Game implements ILogic {
     float friction = 1f;
     float rotation = 0;
     Vector3f start = null;
-    float timeOffset = 1.0f;
     @Override
     public void input(MouseInput input, double deltaTime, int frame) {
 
@@ -137,12 +136,6 @@ public class Game implements ILogic {
         }
         if(window.isKeyPressed(GLFW.GLFW_KEY_DOWN)) {
             radius = Utils.clamp(radius += deltaTime * 10, 1, 100);
-        }
-        if(window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) {
-            timeOffset = 10.0f;
-        }
-        else {
-            timeOffset = 1.0f;
         }
 
         if(window.isKeyPressed(GLFW.GLFW_KEY_1))
@@ -278,7 +271,7 @@ public class Game implements ILogic {
                     entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0)).mul((float) (5f/deltaTime)));
             }
         }
-        physicsSpace.update((float) deltaTime * timeOffset, 2);
+        physicsSpace.update((float) deltaTime, 2);
     }
     float radius = 7.5f;
     float theta = 0.0f;

@@ -11,10 +11,11 @@ public class Constants {
     public static final Vector4f BG_COLOR = new Vector4f(0.53f, 0.81f,0.92f, 1f);
 
     public static final float GRAVITY = -39.2f;
-    public static final boolean FULLSCREEN = true;
-    public static final int WIDTH = 1280, HEIGHT = 720;
+    public static boolean FULLSCREEN = false;
+    public static int WIDTH = 1280, HEIGHT = 720;
+    public static float MAX_FRAMERATE = 60;
     public static float FRAMERATE = 60; // ABOVE 999, PHYSICS BREAKS
-    public static final boolean VSYNC = true;
+    public static boolean VSYNC = true;
 
     public static final float FOV = (float) Math.toRadians(50);
     public static final float Z_NEAR = 0.01f;
