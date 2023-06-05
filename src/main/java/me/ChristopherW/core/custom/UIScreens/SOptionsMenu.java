@@ -33,6 +33,7 @@ public class SOptionsMenu implements IGUIScreen {
     @Override
     public void start() {
         maxFramerateSelected = Arrays.binarySearch(maxFramerateOptions, Launcher.getWindow().monitorRefreshRate);
+        System.out.println("MONITOR FRAMERATE: " + Launcher.getWindow().monitorRefreshRate);
         if(maxFramerateSelected == -1)
             maxFramerateSelected = 1;
     }

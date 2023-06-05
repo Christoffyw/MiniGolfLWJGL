@@ -67,6 +67,7 @@ public class WindowManager {
         GLFWVidMode mode = GLFW.glfwGetVideoMode(monitor);
 
 
+        monitorRefreshRate = mode.refreshRate();
         boolean maximized = false;
         if(width == 0 || height == 0 || Constants.FULLSCREEN) {
             width = mode.width();
@@ -76,7 +77,6 @@ public class WindowManager {
             GLFW.glfwWindowHint(GLFW.GLFW_GREEN_BITS, mode.greenBits());
             GLFW.glfwWindowHint(GLFW.GLFW_BLUE_BITS, mode.blueBits());
             GLFW.glfwWindowHint(GLFW.GLFW_REFRESH_RATE, mode.refreshRate());
-            monitorRefreshRate = mode.refreshRate();
             maximized = true;
         }
         if(maximized) {
@@ -94,11 +94,6 @@ public class WindowManager {
             this.width = width;
             this.height = height;
             this.setResize(true);
-        });
-
-        GLFW.glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if(key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE)
-                GLFW.glfwSetWindowShouldClose(window, true);
         });
 
         ObjectLoader loader = new ObjectLoader();
