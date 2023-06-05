@@ -5,6 +5,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import me.ChristopherW.core.WindowManager;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Model;
+import me.ChristopherW.core.custom.UIScreens.SInGame;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -59,9 +60,9 @@ public class GolfBall extends Entity {
         this.setPosition(courseManager.GetHole(this.getCurrentHoleID()).getStartPos());
         this.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
         this.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
-        window.guiManager.setHoleText(String.format("Hole %d", this.getCurrentHoleID() + 1));
-        window.guiManager.setPlayerText(String.format("Player %d", courseManager.GetBallID(this) + 1));
-        window.guiManager.setStrokeText(String.format("Strokes: %d", this.getScore(this.getCurrentHoleID())));
+        ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", this.getCurrentHoleID() + 1));
+        ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(this) + 1));
+        ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", this.getScore(this.getCurrentHoleID())));
     }
     public boolean isFirstShot() {
         return firstShot;

@@ -67,7 +67,7 @@ public class EngineManager {
 
                 if(frameCounter >= NANOSECOND) {
                     setFps(frames);
-                    window.setTitle(Constants.TITLE + " - FPS: " + getFps() + " - Frametime: " + frametime);
+                    window.setTitle(Constants.TITLE + " - FPS: " + getFps());
                     frames = 0;
                     frameCounter = 0;
                 }

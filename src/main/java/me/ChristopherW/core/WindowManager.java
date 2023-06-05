@@ -5,6 +5,8 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.utils.Constants;
+import me.ChristopherW.test.Launcher;
+
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -107,6 +109,20 @@ public class WindowManager {
             Constants.FRAMERATE = mode.refreshRate();
         }
 
+        GLFW.glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
+            if(key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
+                if(!Constants.inGame)
+                    return;
+                if(guiManager.currentScreen == "Options") {
+                    guiManager.currentScreen = "InGame";
+                    GLFW.glfwSetInputMode(getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+                } else {
+                    guiManager.currentScreen = "Options";
+                    GLFW.glfwSetInputMode(getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+                }
+    
+            }
+        });
 
         GLFW.glfwShowWindow(window);
 
@@ -134,8 +150,6 @@ public class WindowManager {
         imGuiGl3.init(glslVersion);
     }
 
-
-
     public void update() {
         GLFW.glfwSwapBuffers(window);
         GLFW.glfwPollEvents();
@@ -151,7 +165,6 @@ public class WindowManager {
     public void setClearColor(float r, float g, float b, float a) {
         GL11.glClearColor(r, g, b, a);
     }
-
     public boolean isKeyReleased(int keycode) {
         return GLFW.glfwGetKey(window, keycode) == GLFW.GLFW_RELEASE;
     }

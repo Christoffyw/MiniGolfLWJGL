@@ -27,8 +27,8 @@ public class SOptionsMenu implements IGUIScreen {
     Vector2i windowedSize = new Vector2i(0, 0);
 
     int maxFramerateSelected = 0;
-    int[] maxFramerateOptions = {30, 60, 120, 144, 165, 240, 999};
-    boolean[] maxFramerateValues = {false, true, false, false, false, false, false, false};
+    int[] maxFramerateOptions = {30, 60, 75, 120, 144, 165, 240, 999};
+    boolean[] maxFramerateValues = {false, true, false, false, false, false, false, false, false};
 
     @Override
     public void start() {
@@ -51,9 +51,10 @@ public class SOptionsMenu implements IGUIScreen {
             ImGui.text(title);
             ImGui.dummy(0, 50);
             ImGui.setCursorPosX(0);
+            ImGui.pushItemWidth(120);
             if(ImGui.beginCombo("Max FPS", String.valueOf(maxFramerateOptions[maxFramerateSelected]))) {
                 for(int i = 0; i < maxFramerateOptions.length; i++) {
-                    if(ImGui.selectable(String.valueOf(maxFramerateOptions[i]), i == maxFramerateSelected, ImGuiSelectableFlags.None, 190, 30)) {
+                    if(ImGui.selectable(String.valueOf(maxFramerateOptions[i]), i == maxFramerateSelected)) {
                         maxFramerateSelected = i;
                         Constants.FRAMERATE = Constants.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
                         ImGui.setItemDefaultFocus();
@@ -63,6 +64,7 @@ public class SOptionsMenu implements IGUIScreen {
                 }
                 ImGui.endCombo();
             }
+            ImGui.popItemWidth();
             ImGui.dummy(0, 10);
             ImVec2 buttonSize = new ImVec2(200, 50);
             ImVec2 buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
@@ -89,7 +91,12 @@ public class SOptionsMenu implements IGUIScreen {
             buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
             ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
             if(ImGui.button("Back", buttonSize.x, buttonSize.y)) {
-                gm.currentScreen = "MainMenu";
+                if(Constants.inGame) {
+                    gm.currentScreen = "InGame";
+                    GLFW.glfwSetInputMode(Launcher.getWindow().getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+                }
+                else
+                    gm.currentScreen = "MainMenu";
             }
         }
         ImGui.popFont();

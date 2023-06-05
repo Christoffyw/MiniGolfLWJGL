@@ -41,7 +41,7 @@ public class Constants {
         new Color(255,255,255)  // White
     };
 
-    public static boolean mainMenu = true;
+    public static boolean inGame = false;
 
     public static final Vector4f DEFAULT_COLOR = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
     public static final Vector3f AMBIENT_LIGHT = new Vector3f(0.3f ,0.3f, 0.3f);

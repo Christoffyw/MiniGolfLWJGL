@@ -8,6 +8,7 @@ import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import me.ChristopherW.core.WindowManager;
 import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.IGUIScreen;
 import me.ChristopherW.core.utils.Constants;
@@ -38,7 +39,7 @@ public class SMainMenu implements IGUIScreen {
                 ImGui.text("Player Count");
                 ImGui.sameLine();
                 ImGui.inputScalar(" ", ImGuiDataType.S32, playerCount, 1,1);
-                playerCount.set(Math.min(Math.max(playerCount.get(), 2), 12));
+                playerCount.set(Math.min(Math.max(playerCount.get(),1), 12));
                 Constants.PLAYER_COUNT = playerCount.get();
                 ImGui.popItemWidth();
                 ImGui.dummy(0, 10);
@@ -48,7 +49,8 @@ public class SMainMenu implements IGUIScreen {
 
                 ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
                 if(ImGui.button("Play", buttonSize.x, buttonSize.y)) {
-                    Constants.mainMenu = false;
+                    Constants.inGame = true;
+                    gm.currentScreen = "InGame";
                     try {
                         Launcher.getGame().startGame();
                     } catch(Exception e) {

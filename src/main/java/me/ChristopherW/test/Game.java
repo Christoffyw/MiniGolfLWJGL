@@ -5,11 +5,13 @@ import imgui.flag.ImGuiConfigFlags;
 import me.ChristopherW.core.*;
 import me.ChristopherW.core.custom.Hole;
 import me.ChristopherW.core.custom.CourseManager;
+import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.GolfBall;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Texture;
 import me.ChristopherW.core.utils.Constants;
 import me.ChristopherW.core.utils.Utils;
+import me.ChristopherW.core.custom.UIScreens.SInGame;
 
 import com.jme3.bullet.PhysicsSpace;
 
@@ -40,7 +42,7 @@ public class Game implements ILogic {
         window = Launcher.getWindow();
         loader = new ObjectLoader();
         courseManager = new CourseManager();
-        window.guiManager.setCourseManager(courseManager);
+        window.guiManager.cm = courseManager;
         physicsSpace = new PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT);
         physicsSpace.getSolverInfo().setSplitImpulseEnabled(true);
         physicsSpace.setGravity(new com.jme3.math.Vector3f(0, Constants.GRAVITY, 0));
@@ -96,9 +98,9 @@ public class Game implements ILogic {
         }
 
         courseManager.GetBall(0).setEnabled(true);
-        window.guiManager.setHoleText(String.format("Hole %d", 1));
-        window.guiManager.setPlayerText(String.format("Player %d", 1));
-        window.guiManager.setStrokeText(String.format("Strokes: %d", 0));
+        ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", 1));
+        ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", 1));
+        ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", 0));
 
         entities.putAll(courseManager.InitBalls());
 
@@ -122,7 +124,7 @@ public class Game implements ILogic {
     @Override
     public void input(MouseInput input, double deltaTime, int frame) {
 
-        if(Constants.mainMenu) {
+        if(!Constants.inGame || window.guiManager.currentScreen == "Options") {
             return;
         }
 
@@ -165,10 +167,10 @@ public class Game implements ILogic {
                 if(!courseManager.finishedBalls.contains(courseManager.GetBallID(activeBall)))
                     courseManager.NextBall();
                 activeBall = courseManager.GetActiveBall();
-                window.guiManager.setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
-                window.guiManager.setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
-                window.guiManager.setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
-                window.guiManager.setPlayerID(courseManager.GetBallID(activeBall));
+                ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
+                ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
+                ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
+                ((SInGame) window.guiManager.screens.get("InGame")).setPlayerID(courseManager.GetBallID(activeBall));
                 if(activeBall.isFirstShot()) {
                     activeBall.setEnabled(true);
                     activeBall.setFirstShot(false);
@@ -217,7 +219,7 @@ public class Game implements ILogic {
                     activeBall.setShotStrength(dist / DIST);
 
                     activeBall.setScore(activeBall.getCurrentHoleID(), activeBall.getScore(activeBall.getCurrentHoleID()) + 1);
-                    window.guiManager.setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
+                    ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
                 }
                 dist = 0;
             }
@@ -249,10 +251,10 @@ public class Game implements ILogic {
                     courseManager.SetActiveBall(courseManager.GetBalls().get(courseManager.currentBalls.get(0)));
                 }
                 activeBall = courseManager.GetActiveBall();
-                window.guiManager.setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
-                window.guiManager.setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
-                window.guiManager.setPlayerID(courseManager.GetBallID(activeBall));
-                window.guiManager.setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
+                ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
+                ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
+                ((SInGame) window.guiManager.screens.get("InGame")).setPlayerID(courseManager.GetBallID(activeBall));
+                ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
                 start = null;
                 if(activeBall.isFirstShot()) {
                     activeBall.setEnabled(true);
@@ -278,7 +280,7 @@ public class Game implements ILogic {
     @Override
     public void update(float inteveral, MouseInput mouseInput) {
         
-        if(!Constants.mainMenu) {
+        if(Constants.inGame) {
             Vector3f orbitVec = new Vector3f();
             orbitVec.x = (float) (radius * Math.sin(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().x;
             orbitVec.y = radius;
