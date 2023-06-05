@@ -1,6 +1,6 @@
 package me.ChristopherW.core;
 
-import me.ChristopherW.core.utils.Constants;
+import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.test.Launcher;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -31,12 +31,12 @@ public class EngineManager {
     }
     
     public void ForceUpdateFramerate() {
-        frametime = 1.0f / Constants.FRAMERATE;
+        frametime = 1.0f / GlobalVariables.FRAMERATE;
     }
 
     public void start() throws Exception {
         init();
-        frametime = 1.0f / Constants.FRAMERATE;
+        frametime = 1.0f / GlobalVariables.FRAMERATE;
         if(isRunning)
             return;
         run();
@@ -67,7 +67,7 @@ public class EngineManager {
 
                 if(frameCounter >= NANOSECOND) {
                     setFps(frames);
-                    window.setTitle(Constants.TITLE + " - FPS: " + getFps());
+                    window.setTitle(GlobalVariables.TITLE + " - FPS: " + getFps());
                     frames = 0;
                     frameCounter = 0;
                 }

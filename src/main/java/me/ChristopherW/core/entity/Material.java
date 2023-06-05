@@ -2,7 +2,7 @@ package me.ChristopherW.core.entity;
 
 import org.joml.Vector4f;
 
-import static me.ChristopherW.core.utils.Constants.DEFAULT_COLOR;
+import static me.ChristopherW.core.utils.GlobalVariables.DEFAULT_COLOR;
 
 public class Material {
     private Vector4f ambientColor, diffuseColor, specularColor;

@@ -9,7 +9,7 @@ import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.GolfBall;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Texture;
-import me.ChristopherW.core.utils.Constants;
+import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.core.utils.Utils;
 import me.ChristopherW.core.custom.UIScreens.SInGame;
 
@@ -45,7 +45,7 @@ public class Game implements ILogic {
         window.guiManager.cm = courseManager;
         physicsSpace = new PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT);
         physicsSpace.getSolverInfo().setSplitImpulseEnabled(true);
-        physicsSpace.setGravity(new com.jme3.math.Vector3f(0, Constants.GRAVITY, 0));
+        physicsSpace.setGravity(new com.jme3.math.Vector3f(0, GlobalVariables.GRAVITY, 0));
 
         camera = new Camera();
         cameraInc = new Vector3f(0,0,0);
@@ -81,16 +81,16 @@ public class Game implements ILogic {
         Texture shotMeterBaseTexture = new Texture(loader.loadTexture("assets/textures/ArrowBase.png"));
         Texture ballTexture = new Texture(loader.loadTexture("assets/textures/GolfBall.png"));
 
-        for(int i = 0; i < Constants.PLAYER_COUNT; i++) {
+        for(int i = 0; i < GlobalVariables.PLAYER_COUNT; i++) {
             Color color = new Color(255,255,255);
-            if(Constants.RANDOM_COLORS || i >= 12) {
+            if(GlobalVariables.RANDOM_COLORS || i >= 12) {
                 Random rand = new Random();
                 float r = rand.nextFloat();
                 float g = rand.nextFloat();
                 float b = rand.nextFloat();
                 color = new Color(r,g,b);
             } else {
-                color = Constants.DEFAULT_BALL_COLORS[i];
+                color = GlobalVariables.DEFAULT_BALL_COLORS[i];
             }
             Texture texture = new Texture(loader.loadTextureColor(color));
             GolfBall ball = courseManager.AddBall(color, texture, loader, physicsSpace);
@@ -124,7 +124,7 @@ public class Game implements ILogic {
     @Override
     public void input(MouseInput input, double deltaTime, int frame) {
 
-        if(!Constants.inGame || window.guiManager.currentScreen == "Options") {
+        if(!GlobalVariables.inGame || window.guiManager.currentScreen == "Options") {
             return;
         }
 
@@ -132,7 +132,7 @@ public class Game implements ILogic {
         GolfBall activeBall = courseManager.GetActiveBall();
         Entity preview = entities.get("Preview");
 
-        rotation -= input.getDisplVec().y * Constants.MOUSE_SENSITIVITY_X * deltaTime;
+        rotation -= input.getDisplVec().y * GlobalVariables.MOUSE_SENSITIVITY_X;
         if(window.isKeyPressed(GLFW.GLFW_KEY_UP)) {
             radius = Utils.clamp(radius -= deltaTime * 10, 1, 100);
         }
@@ -180,7 +180,7 @@ public class Game implements ILogic {
             activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
             if(input.isLeftButtonPress()) {
                 preview.setPosition(activeBall.getPosition());
-                dist += (input.getDisplVec().x * Constants.MOUSE_SENSITIVITY_Y);
+                dist += (input.getDisplVec().x * GlobalVariables.MOUSE_SENSITIVITY_Y);
                 dist = Utils.clamp(dist, 0, DIST);
                 Vector3f orbitVec = new Vector3f();
                 orbitVec.x = (float) (dist * -0.01 * Math.sin(Math.toRadians(rotation))) + activeBall.getPosition().x;
@@ -270,7 +270,7 @@ public class Game implements ILogic {
                 entity.setPosition(Utils.convert(entity.getRigidBody().getPhysicsLocation(null)));
 
                 if(entity instanceof GolfBall)
-                    entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0)).mul((float) (5f/deltaTime)));
+                    entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0)).mul(200));
             }
         }
         physicsSpace.update((float) deltaTime, 2);
@@ -280,7 +280,7 @@ public class Game implements ILogic {
     @Override
     public void update(float inteveral, MouseInput mouseInput) {
         
-        if(Constants.inGame) {
+        if(GlobalVariables.inGame) {
             Vector3f orbitVec = new Vector3f();
             orbitVec.x = (float) (radius * Math.sin(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().x;
             orbitVec.y = radius;
@@ -312,7 +312,7 @@ public class Game implements ILogic {
             GL11.glViewport(0,0, window.getWidth(), window.getHeight());
             window.setResize(true);
         }
-        GL11.glClearColor(Constants.BG_COLOR.x, Constants.BG_COLOR.y, Constants.BG_COLOR.z, Constants.BG_COLOR.w);
+        GL11.glClearColor(GlobalVariables.BG_COLOR.x, GlobalVariables.BG_COLOR.y, GlobalVariables.BG_COLOR.z, GlobalVariables.BG_COLOR.w);
         renderer.render(camera);
         window.imGuiGlfw.newFrame();
         ImGui.newFrame();

@@ -1,6 +1,6 @@
 package me.ChristopherW.core;
 
-import me.ChristopherW.core.utils.Constants;
+import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.test.Launcher;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
@@ -14,13 +14,13 @@ public class MouseInput {
     private boolean inWindow = false, leftButtonPress = false, rightButtonPress = false;
 
     public MouseInput() {
-        this.previousPos = new Vector2d(Constants.WIDTH/2, Constants.HEIGHT/2);
-        this.currentPos = new Vector2d(Constants.WIDTH/2,Constants.HEIGHT/2);
+        this.previousPos = new Vector2d(GlobalVariables.WIDTH/2, GlobalVariables.HEIGHT/2);
+        this.currentPos = new Vector2d(GlobalVariables.WIDTH/2,GlobalVariables.HEIGHT/2);
         this.displVec = new Vector2f();
     }
 
     public void init() {
-        GLFW.glfwSetCursorPos(Launcher.getWindow().getWindow(), Constants.WIDTH/2, Constants.HEIGHT/2);
+        GLFW.glfwSetCursorPos(Launcher.getWindow().getWindow(), GlobalVariables.WIDTH/2, GlobalVariables.HEIGHT/2);
         GLFW.glfwSetCursorPosCallback(Launcher.getWindow().getWindow(), (window, xpos, ypos) -> {
             this.currentPos.x = xpos;
             this.currentPos.y = ypos;

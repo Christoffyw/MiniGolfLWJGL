@@ -5,7 +5,7 @@ import java.awt.Color;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-public class Constants {
+public class GlobalVariables {
     public static final String TITLE = "Minigolf";
     public static final String ICON_PATH = "assets/textures/icons/Ball_1.png";
     public static final Vector4f BG_COLOR = new Vector4f(0.53f, 0.81f,0.92f, 1f);
@@ -15,16 +15,16 @@ public class Constants {
     public static int WIDTH = 1280, HEIGHT = 720;
     public static float MAX_FRAMERATE = 60;
     public static float FRAMERATE = 60; // ABOVE 999, PHYSICS BREAKS
-    public static boolean VSYNC = true;
+    public static boolean VSYNC = false;
 
     public static final float FOV = (float) Math.toRadians(50);
     public static final float Z_NEAR = 0.01f;
     public static final float Z_FAR = 1000f;
     public static final float CAMERA_MOVE_SPEED = 0.05f;
-    public static final float MOUSE_SENSITIVITY_X = 5f;
+    public static final float MOUSE_SENSITIVITY_X = 0.0625f;
     public static final float MOUSE_SENSITIVITY_Y = 0.25f;
 
-    public static int PLAYER_COUNT = 2; // MAX 12
+    public static int PLAYER_COUNT = 1; // MAX 12
     public static boolean RANDOM_COLORS = false;
     public static Color[] DEFAULT_BALL_COLORS = {
         new Color(0,100,255),   // Blue

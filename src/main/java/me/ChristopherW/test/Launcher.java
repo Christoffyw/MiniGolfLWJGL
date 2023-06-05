@@ -5,7 +5,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.bullet.util.NativeLibrary;
 import me.ChristopherW.core.EngineManager;
 import me.ChristopherW.core.WindowManager;
-import me.ChristopherW.core.utils.Constants;
+import me.ChristopherW.core.utils.GlobalVariables;
 
 import com.jme3.system.NativeLibraryLoader;
 
@@ -37,7 +37,7 @@ public class Launcher{
         NativeLibraryLoader.loadLibbulletjme(true, new File("natives/"), "Release", "Sp");
         NativeLibrary.setStartupMessageEnabled(false);
         NativeLibrary.logger.setLevel(Level.OFF);
-        window = new WindowManager(Constants.TITLE, Constants.WIDTH, Constants.HEIGHT, Constants.VSYNC);
+        window = new WindowManager(GlobalVariables.TITLE, GlobalVariables.WIDTH, GlobalVariables.HEIGHT, GlobalVariables.VSYNC);
         game = new Game();
         engine = new EngineManager();
 

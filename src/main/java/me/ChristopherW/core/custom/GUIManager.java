@@ -17,7 +17,7 @@ import me.ChristopherW.core.custom.UIScreens.SInGame;
 import me.ChristopherW.core.custom.UIScreens.SMainMenu;
 import me.ChristopherW.core.custom.UIScreens.SOptionsMenu;
 import me.ChristopherW.core.entity.Texture;
-import me.ChristopherW.core.utils.Constants;
+import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.test.Launcher;
 
 public class GUIManager {

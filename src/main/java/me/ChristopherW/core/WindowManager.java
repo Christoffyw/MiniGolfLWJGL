@@ -4,10 +4,11 @@ import imgui.ImGui;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import me.ChristopherW.core.custom.GUIManager;
-import me.ChristopherW.core.utils.Constants;
+import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.test.Launcher;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.Callback;
@@ -18,12 +19,15 @@ public class WindowManager {
     public final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     public final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
     public GUIManager guiManager;
-    public int monitorRefreshRate = -1;
     private String glslVersion = null;
     private String title;
 
     private int width, height;
     private long window;
+
+    public int monitorRefreshRate = -1;
+    public Vector2i winPos;
+    public Vector2i winSize;
 
     private boolean resize, vSync;
 
@@ -71,7 +75,7 @@ public class WindowManager {
 
         monitorRefreshRate = mode.refreshRate();
         boolean maximized = false;
-        if(width == 0 || height == 0 || Constants.FULLSCREEN) {
+        if(width == 0 || height == 0 || GlobalVariables.FULLSCREEN) {
             width = mode.width();
             height = mode.height();
             GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_TRUE);
@@ -100,18 +104,18 @@ public class WindowManager {
 
         ObjectLoader loader = new ObjectLoader();
         GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
-        imagebf.put(0, loader.loadtextureBuffer(Constants.ICON_PATH));
+        imagebf.put(0, loader.loadtextureBuffer(GlobalVariables.ICON_PATH));
         GLFW.glfwSetWindowIcon(window, imagebf);
         GLFW.glfwMakeContextCurrent(window);
 
         if(vSync) {
             GLFW.glfwSwapInterval(1);
-            Constants.FRAMERATE = mode.refreshRate();
+            GlobalVariables.FRAMERATE = mode.refreshRate();
         }
 
         GLFW.glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
             if(key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
-                if(!Constants.inGame)
+                if(!GlobalVariables.inGame)
                     return;
                 if(guiManager.currentScreen == "Options") {
                     guiManager.currentScreen = "InGame";
@@ -211,11 +215,11 @@ public class WindowManager {
 
     public Matrix4f updateProjectionMatrix() {
         float aspectRatio = (float) width / height;
-        return projectionMatrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        return projectionMatrix.setPerspective(GlobalVariables.FOV, aspectRatio, GlobalVariables.Z_NEAR, GlobalVariables.Z_FAR);
     }
 
     public Matrix4f updateProjectionMatrix(Matrix4f matrix, int width, int height) {
         float aspectRatio = (float) width / height;
-        return matrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        return matrix.setPerspective(GlobalVariables.FOV, aspectRatio, GlobalVariables.Z_NEAR, GlobalVariables.Z_FAR);
     }
 }
