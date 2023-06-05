@@ -30,6 +30,10 @@ public class EngineManager {
         mouseInput.init();
     }
     
+    public void ForceUpdateFramerate() {
+        frametime = 1.0f / Constants.FRAMERATE;
+    }
+
     public void start() throws Exception {
         init();
         frametime = 1.0f / Constants.FRAMERATE;
@@ -63,7 +67,7 @@ public class EngineManager {
 
                 if(frameCounter >= NANOSECOND) {
                     setFps(frames);
-                    window.setTitle(Constants.TITLE + " - FPS: " + getFps());
+                    window.setTitle(Constants.TITLE + " - FPS: " + getFps() + " - Frametime: " + frametime);
                     frames = 0;
                     frameCounter = 0;
                 }

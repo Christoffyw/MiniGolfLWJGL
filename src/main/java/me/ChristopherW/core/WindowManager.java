@@ -16,6 +16,7 @@ public class WindowManager {
     public final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     public final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
     public GUIManager guiManager;
+    public int monitorRefreshRate = -1;
     private String glslVersion = null;
     private String title;
 
@@ -75,6 +76,7 @@ public class WindowManager {
             GLFW.glfwWindowHint(GLFW.GLFW_GREEN_BITS, mode.greenBits());
             GLFW.glfwWindowHint(GLFW.GLFW_BLUE_BITS, mode.blueBits());
             GLFW.glfwWindowHint(GLFW.GLFW_REFRESH_RATE, mode.refreshRate());
+            monitorRefreshRate = mode.refreshRate();
             maximized = true;
         }
         if(maximized) {

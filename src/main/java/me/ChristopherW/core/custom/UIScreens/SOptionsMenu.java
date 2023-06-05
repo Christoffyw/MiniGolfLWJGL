@@ -1,5 +1,7 @@
 package me.ChristopherW.core.custom.UIScreens;
 
+import java.util.Arrays;
+
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -7,7 +9,9 @@ import org.lwjgl.system.MemoryUtil;
 
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiComboFlags;
 import imgui.flag.ImGuiDataType;
+import imgui.flag.ImGuiSelectableFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -22,11 +26,15 @@ public class SOptionsMenu implements IGUIScreen {
     GLFWVidMode mode = GLFW.glfwGetVideoMode(monitor);
     Vector2i windowedSize = new Vector2i(0, 0);
 
-    boolean maxFPSWindowShowing = false;
+    int maxFramerateSelected = 0;
+    int[] maxFramerateOptions = {30, 60, 120, 144, 165, 240, 999};
+    boolean[] maxFramerateValues = {false, true, false, false, false, false, false, false};
 
     @Override
     public void start() {
-        
+        maxFramerateSelected = Arrays.binarySearch(maxFramerateOptions, Launcher.getWindow().monitorRefreshRate);
+        if(maxFramerateSelected == -1)
+            maxFramerateSelected = 1;
     }
 
     @Override
@@ -41,14 +49,22 @@ public class SOptionsMenu implements IGUIScreen {
             ImGui.setCursorPos(textPosition.x, ImGui.getCursorPosY());
             ImGui.text(title);
             ImGui.dummy(0, 50);
-            ImVec2 buttonSize = new ImVec2(250, 50);
-            ImVec2 buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
-            ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
-            ImInt currentItem = new ImInt(1);
-            ImGui.(String.format("Max FPS: %d", (int)Constants.MAX_FRAMERATE), currentItem, new String[]{"30", "60", "120", "144", "165", "240", "Uncapped"});
+            ImGui.setCursorPosX(0);
+            if(ImGui.beginCombo("Max FPS", String.valueOf(maxFramerateOptions[maxFramerateSelected]))) {
+                for(int i = 0; i < maxFramerateOptions.length; i++) {
+                    if(ImGui.selectable(String.valueOf(maxFramerateOptions[i]), i == maxFramerateSelected, ImGuiSelectableFlags.None, 190, 30)) {
+                        maxFramerateSelected = i;
+                        Constants.FRAMERATE = Constants.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
+                        ImGui.setItemDefaultFocus();
+                        
+                        LogSettings();
+                    }
+                }
+                ImGui.endCombo();
+            }
             ImGui.dummy(0, 10);
-            buttonSize = new ImVec2(200, 50);
-            buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
+            ImVec2 buttonSize = new ImVec2(200, 50);
+            ImVec2 buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
             ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
             if(ImGui.checkbox("Fullscreen", Constants.FULLSCREEN)) {
                 Constants.FULLSCREEN = !Constants.FULLSCREEN;
@@ -65,7 +81,8 @@ public class SOptionsMenu implements IGUIScreen {
             if(ImGui.checkbox("VSync", Constants.VSYNC)) {
                 Constants.VSYNC = !Constants.VSYNC;
                 GLFW.glfwSwapInterval(Constants.VSYNC ? 1 : 0);
-                Constants.FRAMERATE = Constants.VSYNC ? mode.refreshRate() : Constants.FRAMERATE;
+                Constants.FRAMERATE = Constants.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
+                LogSettings();
             }
             ImGui.dummy(0, 10);
             buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
@@ -78,4 +95,11 @@ public class SOptionsMenu implements IGUIScreen {
         ImGui.end();
     }
     
+    void LogSettings() {
+        System.out.println("VSYNC: " + (Constants.VSYNC ? "ON" : "OFF"));
+        System.out.println("MAX FRAMERATE: " + String.valueOf(maxFramerateOptions[maxFramerateSelected]));
+        System.out.println("REAL FRAMERATE: " + String.valueOf(Constants.FRAMERATE));
+        Launcher.getEngine().ForceUpdateFramerate();
+    }
+
 }

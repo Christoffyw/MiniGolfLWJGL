@@ -22,6 +22,11 @@ public class Launcher{
         return game;
     }
 
+    private static EngineManager engine;
+    public static EngineManager getEngine() {
+        return engine;
+    }
+
     public static void main(String[] args) throws Exception {
         Logger logger = Logger.getLogger(PhysicsRigidBody.class.getName());
         logger.setLevel(Level.OFF);
@@ -34,7 +39,7 @@ public class Launcher{
         NativeLibrary.logger.setLevel(Level.OFF);
         window = new WindowManager(Constants.TITLE, Constants.WIDTH, Constants.HEIGHT, Constants.VSYNC);
         game = new Game();
-        EngineManager engine = new EngineManager();
+        engine = new EngineManager();
 
 
         try {
