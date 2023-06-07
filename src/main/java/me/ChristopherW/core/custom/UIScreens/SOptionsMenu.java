@@ -28,17 +28,61 @@ public class SOptionsMenu implements IGUIScreen {
     long monitor = GLFW.glfwGetPrimaryMonitor();
     GLFWVidMode mode = GLFW.glfwGetVideoMode(monitor);
 
+    int resolutionSelected = 0;
+    Resolution[] resolutionOptions = {
+        new Resolution(640, 360),
+        new Resolution(1280, 720),
+        new Resolution(1280, 800),
+        new Resolution(1440, 900),
+        new Resolution(1600, 900),
+        new Resolution(1920, 1080),
+        new Resolution(1920, 1200),
+        new Resolution(2560, 1440),
+        new Resolution(2560, 1600),
+        new Resolution(3840, 2160)
+    };
+    boolean[] resolutionValues = {false, true, false, false, false, false, false, false, false, false};
+
     int maxFramerateSelected = 0;
     int[] maxFramerateOptions = {30, 60, 75, 120, 144, 165, 240, 9999};
     boolean[] maxFramerateValues = {false, true, false, false, false, false, false, false, false};
 
+    int indexOf(int[] array, int check) {
+        for(int i = 0; i < array.length; i++) {
+            if(array[i] == check)
+                return i;
+        }
+        return -1;
+    }
+
+    int getResolutionIndex(Resolution[] array, Resolution check) {
+        for(int i = 0; i < array.length; i++) {
+            if(array[i].height == check.height)
+                if(array[i].width == check.width)
+                    return i;
+        }
+        return -1;
+    }
+
+    <T> int indexOf(T[] array, T check) {
+        for(int i = 0; i < array.length; i++) {
+            if(array[i] == check)
+                return i;
+        }
+        return -1;
+    }
+
     @Override
     public void start() {
-        maxFramerateSelected = Arrays.binarySearch(maxFramerateOptions, Launcher.getWindow().monitorRefreshRate);
+        maxFramerateSelected = indexOf(maxFramerateOptions, Launcher.getWindow().monitorRefreshRate);
         if(maxFramerateSelected == -1)
             maxFramerateSelected = 1;
 
+        resolutionSelected = getResolutionIndex(resolutionOptions, new Resolution(Launcher.getWindow().getWidth(), Launcher.getWindow().getHeight()));
+        if(resolutionSelected == -1);
+            resolutionSelected = 1;
         GlobalVariables.FRAMERATE = GlobalVariables.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
+        
     }
 
     @Override
@@ -53,10 +97,46 @@ public class SOptionsMenu implements IGUIScreen {
             ImGui.setCursorPos(textPosition.x, ImGui.getCursorPosY());
             ImGui.text(title);
             ImGui.dummy(0, 50);
-            ImGui.pushItemWidth(maxFramerateSelected == maxFramerateOptions.length - 1 ? 250 : 125);
+            ImGui.pushItemWidth(250);
             ImGui.setNextWindowBgAlpha(0.4f);
+            if(ImGui.beginCombo("Resolution", String.format("%dx%d", resolutionOptions[resolutionSelected].width, resolutionOptions[resolutionSelected].height))) {
+                ImGui.popFont();
+                ImGui.pushFont(gm.fontSmall);
+                for(int i = 0; i < resolutionOptions.length; i++) {
+                    if(ImGui.selectable(String.format("%dx%d", resolutionOptions[i].width, resolutionOptions[i].height))) {
+                        resolutionSelected = i;
+                        ImGui.setItemDefaultFocus();
+                        if(GlobalVariables.FULLSCREEN) {
+                            GLFW.glfwSetWindowMonitor(gm.window.getWindow(), monitor, 0, 0, resolutionOptions[resolutionSelected].width, resolutionOptions[resolutionSelected].height, mode.refreshRate());
+                        } else {
+                            IntBuffer xbuf = BufferUtils.createIntBuffer(1);
+                            IntBuffer ybuf = BufferUtils.createIntBuffer(1);
+                            GLFW.glfwGetWindowPos(gm.window.getWindow(), xbuf, ybuf);
+                            gm.window.winPos = new Vector2i(xbuf.get(0), ybuf.get(0));
+                            GLFW.glfwSetWindowMonitor(gm.window.getWindow(), MemoryUtil.NULL, gm.window.winPos.x, gm.window.winPos.y, resolutionOptions[resolutionSelected].width, resolutionOptions[resolutionSelected].height, 0);
+                        }
+                        TriggerUpdate();
+                    }
+                }
+                ImGui.endCombo();
+            }
+            if(ImGui.isItemHovered()) {
+                ImGui.setNextWindowBgAlpha(0.4f);
+                ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0.0f);
+                ImGui.popFont();
+                ImGui.pushFont(gm.fontSmall);
+                ImGui.setTooltip("Changes the resolution of the window");
+                ImGui.popFont();
+                ImGui.pushFont(gm.font);
+                ImGui.popStyleVar();
+            }
+            ImGui.popFont();
+            ImGui.pushFont(gm.font);
+            ImGui.dummy(0,10);
             if(GlobalVariables.VSYNC)
                 ImGui.beginDisabled();
+            ImGui.pushItemWidth(maxFramerateSelected == maxFramerateOptions.length - 1 ? 250 : 125);
+            ImGui.setNextWindowBgAlpha(0.4f);
             if(ImGui.beginCombo("Max Framerate", maxFramerateSelected == maxFramerateOptions.length - 1 ? "Unlimited" : String.valueOf(maxFramerateOptions[maxFramerateSelected]))) {
                 ImGui.popFont();
                 ImGui.pushFont(gm.fontSmall);
@@ -99,8 +179,10 @@ public class SOptionsMenu implements IGUIScreen {
                     GLFW.glfwGetWindowPos(gm.window.getWindow(), xbuf, ybuf);
                     gm.window.winPos = new Vector2i(xbuf.get(0), ybuf.get(0));
                     GLFW.glfwSetWindowMonitor(gm.window.getWindow(), monitor, 0, 0, mode.width(), mode.height(), mode.refreshRate());
+                    resolutionSelected = getResolutionIndex(resolutionOptions, new Resolution(mode.width(), mode.height()));
                 } else {
                     GLFW.glfwSetWindowMonitor(gm.window.getWindow(), MemoryUtil.NULL, gm.window.winPos.x, gm.window.winPos.y, gm.window.winSize.x(), gm.window.winSize.y(), 0);
+                    resolutionSelected = getResolutionIndex(resolutionOptions, new Resolution(gm.window.winSize.x(), gm.window.winSize.y()));
                 }
             }
             if(ImGui.isItemHovered()) {
@@ -109,6 +191,23 @@ public class SOptionsMenu implements IGUIScreen {
                 ImGui.popFont();
                 ImGui.pushFont(gm.fontSmall);
                 ImGui.setTooltip("Maximizes the window to take up the entire screen");
+                ImGui.popFont();
+                ImGui.pushFont(gm.font);
+                ImGui.popStyleVar();
+            }
+            ImGui.dummy(0, 10);
+            buttonSize = new ImVec2(200, 50);
+            buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
+            ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
+            if(ImGui.checkbox("Show FPS", GlobalVariables.SHOW_FPS)) {
+                GlobalVariables.SHOW_FPS = !GlobalVariables.SHOW_FPS;
+            }
+            if(ImGui.isItemHovered()) {
+                ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0.0f);
+                ImGui.setNextWindowBgAlpha(0.4f);
+                ImGui.popFont();
+                ImGui.pushFont(gm.fontSmall);
+                ImGui.setTooltip("Displays the games current frames per second in the top left of the screen");
                 ImGui.popFont();
                 ImGui.pushFont(gm.font);
                 ImGui.popStyleVar();

@@ -36,8 +36,16 @@ public class GUIManager {
 
     public void render() {
         ImBoolean p_open = new ImBoolean();
+        ImGui.pushFont(fontSmall);
+        if(GlobalVariables.SHOW_FPS) {
+            ImGui.setNextWindowPos(0, 0);
+            if (ImGui.begin("FPS", p_open, window_flags)) {
+                ImGui.text(String.valueOf(Launcher.getEngine().getFps()));
+            }
+            ImGui.end();
+        }
+        ImGui.popFont();
         ImGui.pushFont(font);
-
         if(currentScreen != "None")
             screens.get(currentScreen).render(p_open, this); 
     }

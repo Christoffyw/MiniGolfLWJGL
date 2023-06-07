@@ -15,6 +15,7 @@ public class GlobalVariables {
     public static int WIDTH = 1280, HEIGHT = 720;
     public static float MAX_FRAMERATE = 60;
     public static float FRAMERATE = 60; // ABOVE 999, PHYSICS BREAKS
+    public static boolean SHOW_FPS = false;
     public static boolean VSYNC = false;
 
     public static final float FOV = (float) Math.toRadians(50);

@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import me.ChristopherW.core.custom.GUIManager;
+import me.ChristopherW.core.custom.UIScreens.Resolution;
 import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.test.Launcher;
 
@@ -25,6 +26,7 @@ public class WindowManager {
     private int width, height;
     private long window;
 
+    public Resolution monitorResolution = null;
     public int monitorRefreshRate = -1;
     public Vector2i winPos;
     public Vector2i winSize;
@@ -73,6 +75,7 @@ public class WindowManager {
         GLFWVidMode mode = GLFW.glfwGetVideoMode(monitor);
 
 
+        monitorResolution = new Resolution(mode.width(), mode.height());
         monitorRefreshRate = mode.refreshRate();
         boolean maximized = false;
         if(width == 0 || height == 0 || GlobalVariables.FULLSCREEN) {

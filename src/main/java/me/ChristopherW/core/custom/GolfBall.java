@@ -10,11 +10,14 @@ import org.joml.Vector3f;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Vector;
 
 public class GolfBall extends Entity {
     private int currentHoleID;
     private boolean firstShot;
     private Vector3f velocity;
+    private Vector3f oldPosition;
+    private Vector3f motionDirection;
     private float friction;
     private long startTime;
     private long endTime;
@@ -22,9 +25,12 @@ public class GolfBall extends Entity {
     private Color color;
     private HashMap<Integer, Integer> scores;
     PhysicsSpace physicsSpace;
+
     public GolfBall(Model model, Vector3f position, Vector3f rotation, Vector3f scale, Color color, PhysicsSpace space) {
         super(model, position, rotation, scale, space);
         this.velocity = new Vector3f(0,0,0);
+        this.motionDirection = new Vector3f(0,0,0);
+        this.oldPosition = new Vector3f(0,0,0);
         this.friction = 0.975f;
         this.startTime = 0;
         this.endTime = 0;
@@ -35,6 +41,21 @@ public class GolfBall extends Entity {
         this.color = color;
         this.scores = new HashMap<>();
     }
+
+    public Vector3f getMotionDirection() {
+        return motionDirection;
+    }
+
+    public void updateDirection() {
+        Vector3f a = new Vector3f(this.getPosition());
+        Vector3f b = new Vector3f(this.oldPosition);
+        double length = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2) + Math.pow(b.z - a.z, 2));
+        Vector3f offset = new Vector3f(0,0,0);
+        b.sub(a, offset);
+        motionDirection = new Vector3f(offset.x/(float)length, offset.y/(float)length, offset.z/(float)length);
+        oldPosition = new Vector3f(this.getPosition().x, this.getPosition().y, this.getPosition().z);
+    }
+
     public int getTotalScore() {
         int totalScore = 0;
         for(int i : scores.values()) {

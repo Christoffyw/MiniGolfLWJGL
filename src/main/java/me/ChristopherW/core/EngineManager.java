@@ -64,7 +64,6 @@ public class EngineManager {
 
                 if(window.windowShouldClose())
                     stop();
-
                 if(frameCounter >= NANOSECOND) {
                     setFps(frames);
                     window.setTitle(GlobalVariables.TITLE + " - FPS: " + getFps());
