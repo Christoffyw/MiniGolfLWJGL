@@ -74,9 +74,5 @@ public class SCredits implements IGUIScreen {
         ImGui.popFont();
         ImGui.end();
     }
-    
-    void TriggerUpdate() {
-        Launcher.getEngine().ForceUpdateFramerate();
-    }
 
 }

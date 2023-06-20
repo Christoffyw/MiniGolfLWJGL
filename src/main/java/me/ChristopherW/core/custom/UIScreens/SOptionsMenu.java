@@ -304,6 +304,20 @@ public class SOptionsMenu implements IGUIScreen {
                 else
                     gm.currentScreen = "MainMenu";
             }
+            ImGui.dummy(0, 10);
+            if(GlobalVariables.inGame) {
+                buttonSize = new ImVec2(200, 50);
+                buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
+                ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
+                if(ImGui.button("Main Menu", buttonSize.x, buttonSize.y)) {
+                    Launcher.getGame().audioSources.get("menuClick").play();
+                    GlobalVariables.inGame = false;
+                    gm.currentScreen = "MainMenu";
+                    gm.screens.get(gm.currentScreen).start();
+                    gm.cm.GetBalls().clear();
+                    Launcher.getGame().rotation = 0;
+                }
+            }
         }
         ImGui.popFont();
         ImGui.end();

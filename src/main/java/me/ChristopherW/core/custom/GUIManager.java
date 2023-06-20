@@ -14,6 +14,7 @@ import imgui.type.ImInt;
 import me.ChristopherW.core.ObjectLoader;
 import me.ChristopherW.core.WindowManager;
 import me.ChristopherW.core.custom.UIScreens.SCredits;
+import me.ChristopherW.core.custom.UIScreens.SGameOver;
 import me.ChristopherW.core.custom.UIScreens.SInGame;
 import me.ChristopherW.core.custom.UIScreens.SMainMenu;
 import me.ChristopherW.core.custom.UIScreens.SOptionsMenu;
@@ -67,11 +68,12 @@ public class GUIManager {
         fontAtlas.build();
         fontConfig.destroy();
 
-        // initialize main menu screens
+        // initialize screens
 
         screens.put("MainMenu", new SMainMenu());
         screens.put("Options", new SOptionsMenu());
         screens.put("Credits", new SCredits());
+        screens.put("GameOver", new SGameOver());
         SInGame sig = new SInGame();
         sig.setCourseManager(cm);
         screens.put("InGame", sig);

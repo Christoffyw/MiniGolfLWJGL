@@ -5,6 +5,7 @@ import imgui.flag.ImGuiConfigFlags;
 import me.ChristopherW.core.*;
 import me.ChristopherW.core.custom.Hole;
 import me.ChristopherW.core.custom.CourseManager;
+import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.GolfBall;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Texture;
@@ -235,11 +236,11 @@ public class Game implements ILogic {
     public float dist = 0;
     float minVel = 0.25f;
     float friction = 1f;
-    float rotation = 0;
+    public float rotation = 0;
     Vector3f start = null;
     @Override
     public void input(MouseInput input, double deltaTime, int frame) {
-        if(!GlobalVariables.inGame || window.guiManager.currentScreen == "Options") {
+        if(!GlobalVariables.inGame || window.guiManager.currentScreen == "Options" || window.guiManager.currentScreen == "GameOver") {
             return;
         }
 
@@ -286,6 +287,7 @@ public class Game implements ILogic {
                 if(!courseManager.finishedBalls.contains(courseManager.GetBallID(activeBall)))
                     courseManager.NextBall();
                 activeBall = courseManager.GetActiveBall();
+                System.out.println(courseManager.GetBallID(activeBall));
                 ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
                 ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
                 ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
@@ -369,7 +371,16 @@ public class Game implements ILogic {
                 if(courseManager.currentBalls.isEmpty()) {
                     courseManager.currentBalls = new ArrayList<>(courseManager.finishedBalls);
                     courseManager.finishedBalls.clear();
+                    boolean gameFinished = true;
+                    for(int ballIndex : courseManager.currentBalls) {
+                        if(courseManager.GetBall(ballIndex).getCurrentHoleID() < courseManager.GetHoleCount() - 1)
+                            gameFinished = false;
+                    }
                     courseManager.SetActiveBall(courseManager.GetBalls().get(courseManager.currentBalls.get(0)));
+                    if(gameFinished) {
+                        window.guiManager.currentScreen = "GameOver";
+                        GLFW.glfwSetInputMode(window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+                    }
                 }
                 activeBall = courseManager.GetActiveBall();
                 ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));

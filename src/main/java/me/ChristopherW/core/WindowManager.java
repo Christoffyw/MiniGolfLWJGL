@@ -132,6 +132,8 @@ public class WindowManager {
             if(key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
                 if(!GlobalVariables.inGame)
                     return;
+                if(guiManager.currentScreen == "GameOver")
+                    return;
                 if(guiManager.currentScreen == "Options") {
                     guiManager.currentScreen = "InGame";
                     GLFW.glfwSetInputMode(getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
