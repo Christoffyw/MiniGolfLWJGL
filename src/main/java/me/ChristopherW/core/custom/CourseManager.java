@@ -51,6 +51,8 @@ public class CourseManager {
                 hole.getHolePosition().add(newLoc);
             }
             hole.setRotation(vectorRotationLookup.get(holes.get(holeID).getHoleDirection().toString()));
+            hole.getGroundEntity().setName("Ground_" + holeID);
+            hole.getWallEntity().setName("Wall_" + holeID);
             holeEntities.put("Ground_" + holeID, hole.getGroundEntity());
             holeEntities.put("Wall_" + holeID, hole.getWallEntity());
         }
@@ -82,6 +84,7 @@ public class CourseManager {
                 ball.setScore(holeID, 0);
             }
             currentBalls.add(i);
+            ball.setName("Ball_" + i);
             ballEntities.put("Ball_" + i, ball);
         }
 

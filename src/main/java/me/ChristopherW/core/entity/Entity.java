@@ -8,6 +8,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class Entity {
+    private String name;
     private PhysicsRigidBody rigidBody;
     private Model model;
     private Vector3f position, rotation, scale;
@@ -16,6 +17,7 @@ public class Entity {
     private PhysicsSpace physicsSpace;
 
     public Entity(Model model, Vector3f position, Vector3f rotation, Vector3f scale, PhysicsSpace space) {
+        this.name = "New Object";
         this.model = model;
         this.position = position;
         this.rotation = rotation;
@@ -25,10 +27,25 @@ public class Entity {
         this.rigidBody = null;
         this.physicsSpace = space;
     }
+
+    public Entity(String name, Model model, Vector3f position, Vector3f rotation, Vector3f scale, PhysicsSpace space) {
+        this.name = name;
+        this.model = model;
+        this.position = position;
+        this.rotation = rotation;
+        this.scale = scale;
+        this.isVisible = true;
+        this.enabled = true;
+        this.rigidBody = null;
+        this.physicsSpace = space;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
 
+
+    
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         if(enabled) {
@@ -171,5 +188,25 @@ public class Entity {
 
     public void setRigidBody(PhysicsRigidBody rigidBody) {
         this.rigidBody = rigidBody;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setModel(Model model) {
+        this.model = model;
+    }
+
+    public PhysicsSpace getPhysicsSpace() {
+        return physicsSpace;
+    }
+
+    public void setPhysicsSpace(PhysicsSpace physicsSpace) {
+        this.physicsSpace = physicsSpace;
     }
 }

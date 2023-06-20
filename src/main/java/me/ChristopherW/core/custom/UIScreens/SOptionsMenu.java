@@ -2,6 +2,7 @@ package me.ChristopherW.core.custom.UIScreens;
 
 import java.nio.IntBuffer;
 import java.util.Arrays;
+import java.util.prefs.Preferences;
 
 import org.joml.Vector2i;
 import org.lwjgl.BufferUtils;
@@ -14,16 +15,27 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiComboFlags;
 import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiSelectableFlags;
+import imgui.flag.ImGuiSliderFlags;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.IGUIScreen;
+import me.ChristopherW.core.sound.SoundSource;
 import me.ChristopherW.core.utils.GlobalVariables;
+import me.ChristopherW.core.utils.Utils;
 import me.ChristopherW.test.Launcher;
 
 public class SOptionsMenu implements IGUIScreen {
+
+    Preferences preferences = Preferences.userRoot().node(Launcher.class.getName());
+    final String ID_MASTER_VOLUME = "MasterVolume";
+    final String ID_RESOLUTION = "DisplayResolution";
+    final String ID_FRAMERATE = "MaximumFramerate";
+    final String ID_FULLSCREEN = "Fullscreen";
+    final String ID_SHOW_FPS = "ShowFPS";
+    final String ID_VSYNC = "Vsync";
 
     long monitor = GLFW.glfwGetPrimaryMonitor();
     GLFWVidMode mode = GLFW.glfwGetVideoMode(monitor);
@@ -47,42 +59,41 @@ public class SOptionsMenu implements IGUIScreen {
     int[] maxFramerateOptions = {30, 60, 75, 120, 144, 165, 240, 9999};
     boolean[] maxFramerateValues = {false, true, false, false, false, false, false, false, false};
 
-    int indexOf(int[] array, int check) {
-        for(int i = 0; i < array.length; i++) {
-            if(array[i] == check)
-                return i;
-        }
-        return -1;
-    }
-
-    int getResolutionIndex(Resolution[] array, Resolution check) {
-        for(int i = 0; i < array.length; i++) {
-            if(array[i].height == check.height)
-                if(array[i].width == check.width)
-                    return i;
-        }
-        return -1;
-    }
-
-    <T> int indexOf(T[] array, T check) {
-        for(int i = 0; i < array.length; i++) {
-            if(array[i] == check)
-                return i;
-        }
-        return -1;
-    }
+    float[] masterVolume = new float[]{100f};
+    float[] defaultGains = new float[Launcher.getGame().audioSources.keySet().size()];
 
     @Override
     public void start() {
-        maxFramerateSelected = indexOf(maxFramerateOptions, Launcher.getWindow().monitorRefreshRate);
+        masterVolume[0] = preferences.getFloat(ID_MASTER_VOLUME, 100f);
+
+        maxFramerateSelected = Utils.indexOf(maxFramerateOptions, preferences.getInt(ID_FRAMERATE, Launcher.getWindow().monitorRefreshRate));
         if(maxFramerateSelected == -1)
             maxFramerateSelected = 1;
 
-        resolutionSelected = getResolutionIndex(resolutionOptions, new Resolution(Launcher.getWindow().getWidth(), Launcher.getWindow().getHeight()));
-        if(resolutionSelected == -1);
-            resolutionSelected = 1;
+        String detectedResolutionString = String.format("%dx%d", Launcher.getWindow().getWidth(), Launcher.getWindow().getHeight());
+        resolutionSelected = Utils.getResolutionIndex(resolutionOptions, GlobalVariables.FULLSCREEN ? Launcher.getWindow().monitorResolution : new Resolution(preferences.get(ID_RESOLUTION, detectedResolutionString)));
+        if(resolutionSelected < 0) {
+            System.out.println("Failed to find matching resolution");
+            resolutionSelected = -1;
+        }
+
         GlobalVariables.FRAMERATE = GlobalVariables.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
         
+        GlobalVariables.SHOW_FPS = preferences.getBoolean(ID_SHOW_FPS, false);
+        GlobalVariables.VSYNC = preferences.getBoolean(ID_VSYNC, false);
+        if(GlobalVariables.VSYNC) {
+            GLFW.glfwSwapInterval(GlobalVariables.VSYNC ? 1 : 0);
+            GlobalVariables.FRAMERATE = GlobalVariables.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
+            Launcher.getEngine().ForceUpdateFramerate();
+        }
+
+        int i = 0;
+        for(String key : Launcher.getGame().audioSources.keySet()) {
+            SoundSource src = Launcher.getGame().audioSources.get(key);
+            defaultGains[i] = src.getGain();
+            src.setGain(defaultGains[i] * masterVolume[0]/100);
+            i++;
+        }
     }
 
     @Override
@@ -97,17 +108,62 @@ public class SOptionsMenu implements IGUIScreen {
             ImGui.setCursorPos(textPosition.x, ImGui.getCursorPosY());
             ImGui.text(title);
             ImGui.dummy(0, 50);
+            ImGui.popFont();
+            ImGui.pushFont(gm.fontSmall);
+            title = "Sound";
+            textWidth = ImGui.calcTextSize(title).x;
+            textPosition = new ImVec2((windowSize.x - textWidth) * 0.5f, windowSize.y * 0.5f);
+            ImGui.setCursorPos(textPosition.x, ImGui.getCursorPosY());
+            ImGui.text(title);
+            ImGui.dummy(0, 20);
+            ImGui.popFont();
+            ImGui.pushFont(gm.font);
+            ImGui.pushItemWidth(200);
+            if(ImGui.sliderFloat("Master Volume", masterVolume, 0.0f, 100.0f, "%.1f%%", ImGuiSliderFlags.AlwaysClamp)) {
+                Launcher.getGame().audioSources.get("menuMusic").setGain(masterVolume[0]/100 * 0.1f);
+                int i = 0;
+                for(String key : Launcher.getGame().audioSources.keySet()) {
+                    SoundSource src = Launcher.getGame().audioSources.get(key);
+                    src.setGain(defaultGains[i] * masterVolume[0]/100);
+                    i++;
+                }
+                UpdateConfiguration();
+            }
+            if(ImGui.isItemHovered()) {
+                ImGui.setNextWindowBgAlpha(0.4f);
+                ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0.0f);
+                ImGui.popFont();
+                ImGui.pushFont(gm.fontSmall);
+                ImGui.setTooltip("Adjusts the volume of all game audio");
+                ImGui.popFont();
+                ImGui.pushFont(gm.font);
+                ImGui.popStyleVar();
+            }
+            ImGui.popFont();
+            ImGui.pushFont(gm.font);
+            ImGui.dummy(0, 10);
+            ImGui.popFont();
+            ImGui.pushFont(gm.fontSmall);
+            title = "Display";
+            textWidth = ImGui.calcTextSize(title).x;
+            textPosition = new ImVec2((windowSize.x - textWidth) * 0.5f, windowSize.y * 0.5f);
+            ImGui.setCursorPos(textPosition.x, ImGui.getCursorPosY());
+            ImGui.text(title);
+            ImGui.dummy(0, 20);
+            ImGui.popFont();
+            ImGui.pushFont(gm.font);
             ImGui.pushItemWidth(250);
             ImGui.setNextWindowBgAlpha(0.4f);
-            if(ImGui.beginCombo("Resolution", String.format("%dx%d", resolutionOptions[resolutionSelected].width, resolutionOptions[resolutionSelected].height))) {
+            if(ImGui.beginCombo("Resolution", resolutionOptions[resolutionSelected].toString())) {
                 ImGui.popFont();
                 ImGui.pushFont(gm.fontSmall);
                 for(int i = 0; i < resolutionOptions.length; i++) {
-                    if(ImGui.selectable(String.format("%dx%d", resolutionOptions[i].width, resolutionOptions[i].height))) {
+                    if(ImGui.selectable(resolutionOptions[i].toString())) {
+                        Launcher.getGame().audioSources.get("menuClick").play();
                         resolutionSelected = i;
                         ImGui.setItemDefaultFocus();
                         if(GlobalVariables.FULLSCREEN) {
-                            GLFW.glfwSetWindowMonitor(gm.window.getWindow(), monitor, 0, 0, resolutionOptions[resolutionSelected].width, resolutionOptions[resolutionSelected].height, mode.refreshRate());
+                            GLFW.glfwSetWindowMonitor(gm.window.getWindow(), monitor, 0, 0, resolutionOptions[resolutionSelected].width, resolutionOptions[resolutionSelected].height, 0);
                         } else {
                             IntBuffer xbuf = BufferUtils.createIntBuffer(1);
                             IntBuffer ybuf = BufferUtils.createIntBuffer(1);
@@ -115,7 +171,7 @@ public class SOptionsMenu implements IGUIScreen {
                             gm.window.winPos = new Vector2i(xbuf.get(0), ybuf.get(0));
                             GLFW.glfwSetWindowMonitor(gm.window.getWindow(), MemoryUtil.NULL, gm.window.winPos.x, gm.window.winPos.y, resolutionOptions[resolutionSelected].width, resolutionOptions[resolutionSelected].height, 0);
                         }
-                        TriggerUpdate();
+                        UpdateConfiguration();
                     }
                 }
                 ImGui.endCombo();
@@ -142,11 +198,11 @@ public class SOptionsMenu implements IGUIScreen {
                 ImGui.pushFont(gm.fontSmall);
                 for(int i = 0; i < maxFramerateOptions.length; i++) {
                     if(ImGui.selectable(i == maxFramerateOptions.length - 1 ? "Unlimited" : String.valueOf(maxFramerateOptions[i]), i == maxFramerateSelected)) {
+                        Launcher.getGame().audioSources.get("menuClick").play();
                         maxFramerateSelected = i;
                         GlobalVariables.FRAMERATE = GlobalVariables.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
                         ImGui.setItemDefaultFocus();
-                        
-                        TriggerUpdate();
+                        UpdateConfiguration();
                     }
                 }
                 ImGui.endCombo();
@@ -171,6 +227,7 @@ public class SOptionsMenu implements IGUIScreen {
             ImVec2 buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
             ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
             if(ImGui.checkbox("Fullscreen", GlobalVariables.FULLSCREEN)) {
+                Launcher.getGame().audioSources.get("menuClick").play();
                 GlobalVariables.FULLSCREEN = !GlobalVariables.FULLSCREEN;
                 if(GlobalVariables.FULLSCREEN) {
                     gm.window.winSize = new Vector2i(GlobalVariables.WIDTH, GlobalVariables.HEIGHT);
@@ -179,11 +236,12 @@ public class SOptionsMenu implements IGUIScreen {
                     GLFW.glfwGetWindowPos(gm.window.getWindow(), xbuf, ybuf);
                     gm.window.winPos = new Vector2i(xbuf.get(0), ybuf.get(0));
                     GLFW.glfwSetWindowMonitor(gm.window.getWindow(), monitor, 0, 0, mode.width(), mode.height(), mode.refreshRate());
-                    resolutionSelected = getResolutionIndex(resolutionOptions, new Resolution(mode.width(), mode.height()));
+                    resolutionSelected = Utils.getResolutionIndex(resolutionOptions, new Resolution(mode.width(), mode.height()));
                 } else {
                     GLFW.glfwSetWindowMonitor(gm.window.getWindow(), MemoryUtil.NULL, gm.window.winPos.x, gm.window.winPos.y, gm.window.winSize.x(), gm.window.winSize.y(), 0);
-                    resolutionSelected = getResolutionIndex(resolutionOptions, new Resolution(gm.window.winSize.x(), gm.window.winSize.y()));
+                    resolutionSelected = Utils.getResolutionIndex(resolutionOptions, new Resolution(gm.window.winSize.x(), gm.window.winSize.y()));
                 }
+                UpdateConfiguration();
             }
             if(ImGui.isItemHovered()) {
                 ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0.0f);
@@ -200,7 +258,9 @@ public class SOptionsMenu implements IGUIScreen {
             buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
             ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
             if(ImGui.checkbox("Show FPS", GlobalVariables.SHOW_FPS)) {
+                Launcher.getGame().audioSources.get("menuClick").play();
                 GlobalVariables.SHOW_FPS = !GlobalVariables.SHOW_FPS;
+                UpdateConfiguration();
             }
             if(ImGui.isItemHovered()) {
                 ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0.0f);
@@ -216,10 +276,11 @@ public class SOptionsMenu implements IGUIScreen {
             buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
             ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
             if(ImGui.checkbox("VSync", GlobalVariables.VSYNC)) {
+                Launcher.getGame().audioSources.get("menuClick").play();
                 GlobalVariables.VSYNC = !GlobalVariables.VSYNC;
                 GLFW.glfwSwapInterval(GlobalVariables.VSYNC ? 1 : 0);
                 GlobalVariables.FRAMERATE = GlobalVariables.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
-                TriggerUpdate();
+                UpdateConfiguration();
             }
             if(ImGui.isItemHovered()) {
                 ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0.0f);
@@ -235,6 +296,7 @@ public class SOptionsMenu implements IGUIScreen {
             buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
             ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
             if(ImGui.button("Back", buttonSize.x, buttonSize.y)) {
+                Launcher.getGame().audioSources.get("menuClick").play();
                 if(GlobalVariables.inGame) {
                     gm.currentScreen = "InGame";
                     GLFW.glfwSetInputMode(gm.window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
@@ -247,11 +309,15 @@ public class SOptionsMenu implements IGUIScreen {
         ImGui.end();
     }
     
-    void TriggerUpdate() {
-        //System.out.println("VSYNC: " + (GlobalVariables.VSYNC ? "ON" : "OFF"));
-        //System.out.println("MAX FRAMERATE: " + String.valueOf(maxFramerateOptions[maxFramerateSelected]));
-        //System.out.println("REAL FRAMERATE: " + String.valueOf(GlobalVariables.FRAMERATE));
+    void UpdateConfiguration() {
         Launcher.getEngine().ForceUpdateFramerate();
+
+        preferences.putFloat(ID_MASTER_VOLUME, masterVolume[0]);
+        preferences.put(ID_RESOLUTION, resolutionOptions[resolutionSelected].toString());
+        preferences.putInt(ID_FRAMERATE, maxFramerateOptions[maxFramerateSelected]);
+        preferences.putBoolean(ID_FULLSCREEN, GlobalVariables.FULLSCREEN);
+        preferences.putBoolean(ID_SHOW_FPS, GlobalVariables.SHOW_FPS);
+        preferences.putBoolean(ID_VSYNC, GlobalVariables.VSYNC);
     }
 
 }

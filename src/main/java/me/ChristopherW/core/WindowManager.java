@@ -8,8 +8,12 @@ import me.ChristopherW.core.custom.UIScreens.Resolution;
 import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.test.Launcher;
 
+import java.nio.IntBuffer;
+import java.util.prefs.Preferences;
+
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.Callback;
@@ -42,6 +46,7 @@ public class WindowManager {
         this.vSync = vSync;
         projectionMatrix = new Matrix4f();
         guiManager = new GUIManager(this);
+        GlobalVariables.FULLSCREEN = Preferences.userRoot().node(Launcher.class.getName()).getBoolean("Fullscreen", false);
     }
 
     public boolean isResize() {
@@ -79,8 +84,6 @@ public class WindowManager {
         monitorRefreshRate = mode.refreshRate();
         boolean maximized = false;
         if(width == 0 || height == 0 || GlobalVariables.FULLSCREEN) {
-            width = mode.width();
-            height = mode.height();
             GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_TRUE);
             GLFW.glfwWindowHint(GLFW.GLFW_RED_BITS, mode.redBits());
             GLFW.glfwWindowHint(GLFW.GLFW_GREEN_BITS, mode.greenBits());
@@ -89,7 +92,16 @@ public class WindowManager {
             maximized = true;
         }
         if(maximized) {
+            window = GLFW.glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
+            GLFW.glfwSetWindowPos(window, (mode.width() - width) / 2, (mode.height() - height) / 2);
+            winSize = new Vector2i(GlobalVariables.WIDTH, GlobalVariables.HEIGHT);
+            IntBuffer xbuf = BufferUtils.createIntBuffer(1);
+            IntBuffer ybuf = BufferUtils.createIntBuffer(1);
+            GLFW.glfwGetWindowPos(window, xbuf, ybuf);
+            winPos = new Vector2i(xbuf.get(0), ybuf.get(0));
             window = GLFW.glfwCreateWindow(mode.width(), mode.height(), title, monitor, MemoryUtil.NULL);
+            width = mode.width();
+            height = mode.height();
             GLFW.glfwMaximizeWindow(window);
         }
         else {

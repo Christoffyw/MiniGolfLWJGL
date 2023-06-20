@@ -9,6 +9,10 @@ import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.GolfBall;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Texture;
+import me.ChristopherW.core.sound.SoundBuffer;
+import me.ChristopherW.core.sound.SoundListener;
+import me.ChristopherW.core.sound.SoundManager;
+import me.ChristopherW.core.sound.SoundSource;
 import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.core.utils.Utils;
 import me.ChristopherW.core.custom.UIScreens.SInGame;
@@ -18,6 +22,7 @@ import com.jme3.bullet.PhysicsSpace;
 import org.joml.Vector3f;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.openal.AL11;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -27,11 +32,13 @@ public class Game implements ILogic {
     private final RenderManager renderer;
     private final ObjectLoader loader;
     private final WindowManager window;
-    private final CourseManager courseManager;
+    public final CourseManager courseManager;
+    private final SoundManager soundManager;
     PhysicsSpace physicsSpace;
 
+    public HashMap<String, SoundSource> audioSources = new HashMap<>();
 
-    private Map<String, Entity> entities;
+    public Map<String, Entity> entities;
     private Camera camera;
     public static Texture defaultTexture;
 
@@ -42,13 +49,98 @@ public class Game implements ILogic {
         window = Launcher.getWindow();
         loader = new ObjectLoader();
         courseManager = new CourseManager();
+        soundManager = new SoundManager();
+        soundManager.setAttenuationModel(AL11.AL_EXPONENT_DISTANCE);
+
         window.guiManager.cm = courseManager;
-        physicsSpace = new PhysicsSpace(PhysicsSpace.BroadphaseType.DBVT);
+        physicsSpace = new GolfPhysics(PhysicsSpace.BroadphaseType.DBVT);
         physicsSpace.getSolverInfo().setSplitImpulseEnabled(true);
         physicsSpace.setGravity(new com.jme3.math.Vector3f(0, GlobalVariables.GRAVITY, 0));
 
         camera = new Camera();
         cameraInc = new Vector3f(0,0,0);
+        soundManager.setListener(new SoundListener(new Vector3f(0, 0, 0)));
+        loadSounds();   
+    }
+
+    void loadSounds() {
+        try {
+            SoundBuffer golfHit1Buffer = new SoundBuffer("assets/sounds/golfHit1.ogg");
+            soundManager.addSoundBuffer(golfHit1Buffer);
+            SoundSource golfHit1Source = new SoundSource(false, false);
+            golfHit1Source.setPosition(new Vector3f(0,0,0));
+            golfHit1Source.setBuffer(golfHit1Buffer.getBufferId());
+            audioSources.put("golfHit1", golfHit1Source);
+            soundManager.addSoundSource("golfHit1", golfHit1Source);
+
+            SoundBuffer golfHit2Buffer = new SoundBuffer("assets/sounds/golfHit2.ogg");
+            soundManager.addSoundBuffer(golfHit2Buffer);
+            SoundSource golfHit2Source = new SoundSource(false, false);
+            golfHit2Source.setPosition(new Vector3f(0,0,0));
+            golfHit2Source.setBuffer(golfHit2Buffer.getBufferId());
+            audioSources.put("golfHit2", golfHit2Source);
+            soundManager.addSoundSource("golfHit2", golfHit2Source);
+
+            SoundBuffer golfHit3Buffer = new SoundBuffer("assets/sounds/golfHit3.ogg");
+            soundManager.addSoundBuffer(golfHit3Buffer);
+            SoundSource golfHit3Source = new SoundSource(false, false);
+            golfHit3Source.setPosition(new Vector3f(0,0,0));
+            golfHit3Source.setBuffer(golfHit3Buffer.getBufferId());
+            audioSources.put("golfHit3", golfHit3Source);
+            soundManager.addSoundSource("golfHit3", golfHit3Source);
+
+            SoundBuffer bounce1Buffer = new SoundBuffer("assets/sounds/bounce1.ogg");
+            soundManager.addSoundBuffer(bounce1Buffer);
+            SoundSource bounce1Source = new SoundSource(false, false);
+            golfHit3Source.setPosition(new Vector3f(0,0,0));
+            bounce1Source.setBuffer(bounce1Buffer.getBufferId());
+            audioSources.put("bounce1", bounce1Source);
+            soundManager.addSoundSource("bounce1", bounce1Source);
+
+            SoundBuffer bounce2Buffer = new SoundBuffer("assets/sounds/bounce2.ogg");
+            soundManager.addSoundBuffer(bounce2Buffer);
+            SoundSource bounce2Source = new SoundSource(false, false);
+            golfHit3Source.setPosition(new Vector3f(0,0,0));
+            bounce2Source.setBuffer(bounce2Buffer.getBufferId());
+            audioSources.put("bounce2", bounce2Source);
+            soundManager.addSoundSource("bounce2", bounce2Source);
+
+            SoundBuffer bounce3Buffer = new SoundBuffer("assets/sounds/bounce3.ogg");
+            soundManager.addSoundBuffer(bounce3Buffer);
+            SoundSource bounce3Source = new SoundSource(false, false);
+            golfHit3Source.setPosition(new Vector3f(0,0,0));
+            bounce3Source.setBuffer(bounce3Buffer.getBufferId());
+            audioSources.put("bounce3", bounce3Source);
+            soundManager.addSoundSource("bounce3", bounce3Source);
+
+            SoundBuffer menuClickBuffer = new SoundBuffer("assets/sounds/menuClick.ogg");
+            soundManager.addSoundBuffer(menuClickBuffer);
+            SoundSource menuClickSource = new SoundSource(false, false);
+            menuClickSource.setPosition(new Vector3f(0,0,0));
+            menuClickSource.setBuffer(menuClickBuffer.getBufferId());
+            audioSources.put("menuClick", menuClickSource);
+            soundManager.addSoundSource("menuClick", menuClickSource);
+
+            SoundBuffer menuMusicBuffer = new SoundBuffer("assets/sounds/menuMusic.ogg");
+            soundManager.addSoundBuffer(menuMusicBuffer);
+            SoundSource menuMusicSource = new SoundSource(true, true);
+            menuMusicSource.setPosition(new Vector3f(0,0,0));
+            menuMusicSource.setBuffer(menuMusicBuffer.getBufferId());
+            audioSources.put("menuMusic", menuMusicSource);
+            soundManager.addSoundSource("menuMusic", menuMusicSource);
+
+            golfHit1Source.setGain(0.1f);
+            golfHit2Source.setGain(0.1f);
+            golfHit3Source.setGain(0.1f);
+            bounce1Source.setGain(0.1f);
+            bounce2Source.setGain(0.1f);
+            bounce3Source.setGain(0.1f);
+            menuClickSource.setGain(0.1f);
+            menuMusicSource.setGain(0.3f);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -63,6 +155,8 @@ public class Game implements ILogic {
         Texture courseTexture5 = new Texture(loader.loadTexture("assets/textures/GolfCourse5.png"));
         Texture courseTexture6 = new Texture(loader.loadTexture("assets/textures/GolfCourse6.png"));
         Texture courseTexture7 = new Texture(loader.loadTexture("assets/textures/GolfCourse7.png"));
+        Texture courseTexture8 = new Texture(loader.loadTexture("assets/textures/GolfCourse8.png"));
+        Texture courseTexture9 = new Texture(loader.loadTexture("assets/textures/GolfCourse9.png"));
 
         entities = new HashMap<>();
 
@@ -73,7 +167,22 @@ public class Game implements ILogic {
         courseManager.AddHole(new Hole(new Vector3f(0, 0, 1), loader.loadModel("assets/models/ground5.obj", courseTexture5), loader.loadModel("assets/models/walls5.obj", courseTexture5), loader, physicsSpace));
         courseManager.AddHole(new Hole(2.1f, new Vector3f(-1, 0, 0), loader.loadModel("assets/models/ground6.obj", courseTexture6), loader.loadModel("assets/models/walls6.obj", courseTexture6), loader, physicsSpace));
         courseManager.AddHole(new Hole(new Vector3f(-1, 0, 0), loader.loadModel("assets/models/ground7.obj", courseTexture7), loader.loadModel("assets/models/walls7.obj", courseTexture7), loader, physicsSpace));
+        courseManager.AddHole(new Hole(new Vector3f(0, 0, 1), loader.loadModel("assets/models/ground8.obj", courseTexture8), loader.loadModel("assets/models/walls8.obj", courseTexture8), loader, physicsSpace));
+        courseManager.AddHole(new Hole(new Vector3f(-1, 0, 0), loader.loadModel("assets/models/ground9.obj", courseTexture9), loader.loadModel("assets/models/walls9.obj", courseTexture9), loader, physicsSpace));
         entities.putAll(courseManager.InitHoles());
+    }
+
+    SoundSource getRandomHitSound() {
+        Random random = new Random();
+        switch(random.nextInt(3)) {
+            case 0:
+                return audioSources.get("golfHit1");
+            case 1:
+                return audioSources.get("golfHit2");
+            case 2:
+                return audioSources.get("golfHit3");
+        }
+        return audioSources.get("golfHit1");
     }
 
     public void startGame() throws Exception {
@@ -123,7 +232,6 @@ public class Game implements ILogic {
     Vector3f start = null;
     @Override
     public void input(MouseInput input, double deltaTime, int frame) {
-
         if(!GlobalVariables.inGame || window.guiManager.currentScreen == "Options") {
             return;
         }
@@ -154,6 +262,10 @@ public class Game implements ILogic {
             activeBall.teleportHole(5, courseManager, window);
         if(window.isKeyPressed(GLFW.GLFW_KEY_7))
             activeBall.teleportHole(6, courseManager, window);
+        if(window.isKeyPressed(GLFW.GLFW_KEY_8))
+            activeBall.teleportHole(7, courseManager, window);
+        if(window.isKeyPressed(GLFW.GLFW_KEY_9))
+            activeBall.teleportHole(8, courseManager, window);
 
         Entity shotMeterHead = entities.get("ShotmeterHead");
         Entity shotMeterBase = entities.get("ShotmeterBase");
@@ -220,6 +332,8 @@ public class Game implements ILogic {
 
                     activeBall.setScore(activeBall.getCurrentHoleID(), activeBall.getScore(activeBall.getCurrentHoleID()) + 1);
                     ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
+
+                    getRandomHitSound().play();
                 }
                 dist = 0;
             }
@@ -273,7 +387,7 @@ public class Game implements ILogic {
                     entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0)).mul(200));
             }
         }
-        physicsSpace.update((float) deltaTime, 2);
+        physicsSpace.update((float) deltaTime, 2, false, true, false);
     }
     float radius = 7.5f;
     float theta = 0.0f;

@@ -20,6 +20,7 @@ public class SMainMenu implements IGUIScreen {
 
     @Override
     public void start() {
+        Launcher.getGame().audioSources.get("menuMusic").play();
     }
 
     @Override
@@ -49,6 +50,9 @@ public class SMainMenu implements IGUIScreen {
 
                 ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
                 if(ImGui.button("Play", buttonSize.x, buttonSize.y)) {
+                    Launcher.getGame().audioSources.get("menuClick").play();
+                    Launcher.getGame().audioSources.get("menuMusic").stop();
+
                     GlobalVariables.inGame = true;
                     gm.currentScreen = "InGame";
                     try {
@@ -62,12 +66,21 @@ public class SMainMenu implements IGUIScreen {
                 buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
                 ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
                 if(ImGui.button("Options", buttonSize.x, buttonSize.y)) {
+                    Launcher.getGame().audioSources.get("menuClick").play();
                     gm.currentScreen = "Options";
                 }
                 ImGui.dummy(0, 10);
                 buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
                 ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
+                if(ImGui.button("Credits", buttonSize.x, buttonSize.y)) {
+                    Launcher.getGame().audioSources.get("menuClick").play();
+                    gm.currentScreen = "Credits";
+                }
+                ImGui.dummy(0, 10);
+                buttonPosition = new ImVec2((windowSize.x - buttonSize.x) * 0.5f, ImGui.getCursorPosY());
+                ImGui.setCursorPos(buttonPosition.x, buttonPosition.y);
                 if(ImGui.button("Exit", buttonSize.x, buttonSize.y)) {
+                    Launcher.getGame().audioSources.get("menuClick").play();
                     ImGui.popFont();
                     ImGui.end();
                     Launcher.getGame().cleanup();

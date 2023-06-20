@@ -2,6 +2,9 @@ package me.ChristopherW.core.utils;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+
+import me.ChristopherW.core.custom.UIScreens.Resolution;
+
 import org.joml.Quaternionf;
 import org.lwjgl.system.MemoryUtil;
 
@@ -127,4 +130,30 @@ public class Utils {
         position.y = y;
         return position;
     }
+
+    public static int indexOf(int[] array, int check) {
+        for(int i = 0; i < array.length; i++) {
+            if(array[i] == check)
+                return i;
+        }
+        return -1;
+    }
+
+    public static int getResolutionIndex(Resolution[] array, Resolution check) {
+        for(int i = 0; i < array.length; i++) {
+            if(array[i].height == check.height)
+                if(array[i].width == check.width)
+                    return i;
+        }
+        return -1;
+    }
+
+    <T> int indexOf(T[] array, T check) {
+        for(int i = 0; i < array.length; i++) {
+            if(array[i] == check)
+                return i;
+        }
+        return -1;
+    }
+
 }

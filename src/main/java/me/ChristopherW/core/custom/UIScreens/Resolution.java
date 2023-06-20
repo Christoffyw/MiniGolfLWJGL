@@ -9,4 +9,14 @@ public class Resolution {
         this.height = height;
         this.aspectRatio = (float)width/(float)height;
     }
+    public Resolution(String parsableResolution) {
+        String[] dimensions = parsableResolution.split("x");
+        this.width = Integer.parseInt(dimensions[0]);
+        this.height = Integer.parseInt(dimensions[1]);
+        this.aspectRatio = (float)width/(float)height;
+    }
+
+    public String toString() {
+        return String.format("%dx%d", width, height);
+    }
 }

@@ -13,6 +13,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import me.ChristopherW.core.ObjectLoader;
 import me.ChristopherW.core.WindowManager;
+import me.ChristopherW.core.custom.UIScreens.SCredits;
 import me.ChristopherW.core.custom.UIScreens.SInGame;
 import me.ChristopherW.core.custom.UIScreens.SMainMenu;
 import me.ChristopherW.core.custom.UIScreens.SOptionsMenu;
@@ -61,8 +62,8 @@ public class GUIManager {
         fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesDefault());
         fontConfig.setPixelSnapH(true);
         fontAtlas.addFontDefault();
-        font = fontAtlas.addFontFromFileTTF("assets/fonts/mont.otf", 34f, fontConfig);
-        fontSmall = fontAtlas.addFontFromFileTTF("assets/fonts/mont.otf", 17f, fontConfig);
+        font = fontAtlas.addFontFromFileTTF("assets/fonts/mont-heavy.ttf", 34f, fontConfig);
+        fontSmall = fontAtlas.addFontFromFileTTF("assets/fonts/mont-heavy.ttf", 17f, fontConfig);
         fontAtlas.build();
         fontConfig.destroy();
 
@@ -70,6 +71,7 @@ public class GUIManager {
 
         screens.put("MainMenu", new SMainMenu());
         screens.put("Options", new SOptionsMenu());
+        screens.put("Credits", new SCredits());
         SInGame sig = new SInGame();
         sig.setCourseManager(cm);
         screens.put("InGame", sig);
