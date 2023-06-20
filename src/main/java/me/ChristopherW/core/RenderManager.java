@@ -18,7 +18,6 @@ import java.util.Map;
 
 public class RenderManager {
     private final WindowManager window;
-    private ShaderManager shader;
     public Matrix4f viewMatrix;
     private Map<Model, List<Entity>> entities = new HashMap<>();
 
@@ -27,16 +26,7 @@ public class RenderManager {
     }
 
     public void init() throws Exception {
-        shader = new ShaderManager("/shaders/vertex.glsl", "/shaders/fragment.glsl");
-        shader.init();
-        shader.link();
-        shader.createUniform("textureSampler");
-        shader.createUniform("transformationMatrix");
-        shader.createUniform("projectionMatrix");
-        shader.createUniform("viewMatrix");
-        shader.createUniform("m3x3InvTrans");
-        //shader.createUniform("ambientLight");
-        //shader.createMaterialUniform("material");
+
     }
 
     public void bind(Model model) {
@@ -59,30 +49,33 @@ public class RenderManager {
         GL30.glBindVertexArray(0);
     }
 
-    public void prepare(Entity entity, Camera camera) {
+    public void prepare(ShaderManager shader, Entity entity, Camera camera) {
         shader.setUniform("textureSampler", 0);
         Matrix4f modelMatrix = Transformation.createTransformationMatrix(entity);
         shader.setUniform("transformationMatrix", modelMatrix);
         shader.setUniform("viewMatrix", Transformation.createViewMatrix(camera));
         shader.setUniform("m3x3InvTrans", Transformation.createInvTransMatrix(modelMatrix));
+        if(entity.getName().startsWith("Shotmeter")) {
+            shader.setUniform("power", Launcher.getGame().dist);
+        }
     }
 
     public void render(Camera camera) {
         clear();
-        shader.bind();
-        shader.setUniform("projectionMatrix", window.updateProjectionMatrix());
 
         for(Model model : entities.keySet()) {
+            model.getShader().bind();
+            model.getShader().setUniform("projectionMatrix", window.updateProjectionMatrix());
             bind(model);
             List<Entity> entityList = entities.get(model);
             for(Entity entity : entityList) {
-                prepare(entity, camera);
+                prepare(model.getShader(), entity, camera);
                 GL11.glDrawElements(GL11.GL_TRIANGLES, entity.getModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
             }
             unbind();
+            model.getShader().unbind();
         }
         entities.clear();
-        shader.unbind();
     }
     public void processEntity(Entity entity) {
         List<Entity> entityList = entities.get(entity.getModel());
@@ -100,6 +93,8 @@ public class RenderManager {
     }
 
     public void cleanup() {
-        shader.cleanup();
+        for(Model model : entities.keySet()) {
+            model.getShader().cleanup();
+        }
     }
 }

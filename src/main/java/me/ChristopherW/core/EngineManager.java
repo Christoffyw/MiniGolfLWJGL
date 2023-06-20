@@ -86,7 +86,7 @@ public class EngineManager {
         cleanup();
     }
 
-    private void stop() {
+    public void stop() {
         if(!isRunning)
             return;
         isRunning = false;

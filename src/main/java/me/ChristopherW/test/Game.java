@@ -218,13 +218,21 @@ public class Game implements ILogic {
         previewEntity.setVisible(false);
         arrowHeadEntity.setVisible(false);
         arrowBaseEntity.setVisible(false);
+        arrowBaseEntity.getModel().setShader(new ShaderManager("/shaders/vertex.glsl", "/shaders/shotmeterFrag.glsl"));
+        arrowBaseEntity.getModel().getShader().start();
+        arrowBaseEntity.getModel().getShader().createUniform("power");
+        arrowBaseEntity.setName("ShotmeterBase");
+        arrowHeadEntity.getModel().setShader(new ShaderManager("/shaders/vertex.glsl", "/shaders/shotmeterFrag.glsl"));
+        arrowHeadEntity.getModel().getShader().start();
+        arrowHeadEntity.getModel().getShader().createUniform("power");
+        arrowHeadEntity.setName("ShotmeterHead");
         entities.put("Preview", previewEntity);
         entities.put("ShotmeterHead", arrowHeadEntity);
         entities.put("ShotmeterBase", arrowBaseEntity);
     }
 
     final float DIST = 500f;
-    float dist = 0;
+    public float dist = 0;
     float minVel = 0.25f;
     float friction = 1f;
     float rotation = 0;

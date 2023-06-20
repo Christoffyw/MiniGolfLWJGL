@@ -203,4 +203,18 @@ public class ShaderManager {
         createVertexShader(Utils.loadResource(vertexPath));
         createFragmentShader(Utils.loadResource(fragmentPath));
     }
+
+    public void start() {
+        try {
+            this.init();
+            this.link();
+            this.createUniform("textureSampler");
+            this.createUniform("transformationMatrix");
+            this.createUniform("projectionMatrix");
+            this.createUniform("viewMatrix");
+            this.createUniform("m3x3InvTrans");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
