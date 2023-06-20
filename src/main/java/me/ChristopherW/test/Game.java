@@ -5,7 +5,6 @@ import imgui.flag.ImGuiConfigFlags;
 import me.ChristopherW.core.*;
 import me.ChristopherW.core.custom.Hole;
 import me.ChristopherW.core.custom.CourseManager;
-import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.GolfBall;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Texture;
@@ -444,7 +443,6 @@ public class Game implements ILogic {
 
     @Override
     public void cleanup() {
-        //TextMaster.cleanup();
         renderer.cleanup();
         loader.cleanup();
     }
