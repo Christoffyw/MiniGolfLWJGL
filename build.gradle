@@ -4,12 +4,12 @@ plugins {
 }
 
 project.ext.lwjglVersion = "3.3.1"
-project.ext.lwjglNatives = "natives-windows"
+project.ext.lwjglNatives = "natives-linux"
 project.ext.jomlVersion = "1.10.5"
 project.ext.jomlPrimVersion = "1.10.0"
 
 group 'me.ChristopherW'
-version '1.0-SNAPSHOT'
+version '1.0'
 
 repositories {
     mavenCentral()

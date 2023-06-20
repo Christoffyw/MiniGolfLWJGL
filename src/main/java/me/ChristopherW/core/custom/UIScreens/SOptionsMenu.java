@@ -71,11 +71,11 @@ public class SOptionsMenu implements IGUIScreen {
             maxFramerateSelected = 1;
 
         String detectedResolutionString = String.format("%dx%d", Launcher.getWindow().getWidth(), Launcher.getWindow().getHeight());
-        resolutionSelected = Utils.getResolutionIndex(resolutionOptions, GlobalVariables.FULLSCREEN ? Launcher.getWindow().monitorResolution : new Resolution(preferences.get(ID_RESOLUTION, detectedResolutionString)));
-        if(resolutionSelected < 0) {
-            System.out.println("Failed to find matching resolution");
+        String configResolution = preferences.get(ID_RESOLUTION, detectedResolutionString);
+        if(configResolution == "Unknown")
             resolutionSelected = -1;
-        }
+        else
+            resolutionSelected = Utils.getResolutionIndex(resolutionOptions, GlobalVariables.FULLSCREEN ? Launcher.getWindow().monitorResolution : new Resolution(preferences.get(ID_RESOLUTION, detectedResolutionString)));
 
         GlobalVariables.FRAMERATE = GlobalVariables.VSYNC ? mode.refreshRate() : maxFramerateOptions[maxFramerateSelected];
         
@@ -154,7 +154,7 @@ public class SOptionsMenu implements IGUIScreen {
             ImGui.pushFont(gm.font);
             ImGui.pushItemWidth(250);
             ImGui.setNextWindowBgAlpha(0.4f);
-            if(ImGui.beginCombo("Resolution", resolutionOptions[resolutionSelected].toString())) {
+            if(ImGui.beginCombo("Resolution", resolutionSelected == -1 ? "Unknown" : resolutionOptions[resolutionSelected].toString())) {
                 ImGui.popFont();
                 ImGui.pushFont(gm.fontSmall);
                 for(int i = 0; i < resolutionOptions.length; i++) {
@@ -313,7 +313,7 @@ public class SOptionsMenu implements IGUIScreen {
         Launcher.getEngine().ForceUpdateFramerate();
 
         preferences.putFloat(ID_MASTER_VOLUME, masterVolume[0]);
-        preferences.put(ID_RESOLUTION, resolutionOptions[resolutionSelected].toString());
+        preferences.put(ID_RESOLUTION, resolutionSelected == -1 ? "Unknown" : resolutionOptions[resolutionSelected].toString());
         preferences.putInt(ID_FRAMERATE, maxFramerateOptions[maxFramerateSelected]);
         preferences.putBoolean(ID_FULLSCREEN, GlobalVariables.FULLSCREEN);
         preferences.putBoolean(ID_SHOW_FPS, GlobalVariables.SHOW_FPS);
