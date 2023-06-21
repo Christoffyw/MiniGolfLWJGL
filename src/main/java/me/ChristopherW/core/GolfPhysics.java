@@ -29,6 +29,8 @@ public class GolfPhysics extends PhysicsSpace {
     public void onContactProcessed(PhysicsCollisionObject pcoA, PhysicsCollisionObject pcoB, long pointId) {
         Entity a = null;
         Entity b = null;
+
+        // get Entities from the given RigidBodies
         for(String key : Launcher.getGame().entities.keySet()) {
             Entity e = Launcher.getGame().entities.get(key);
             if(pcoA instanceof PhysicsRigidBody) {
@@ -47,11 +49,17 @@ public class GolfPhysics extends PhysicsSpace {
             }
         }
 
+        // ignore collisions with no entities found
         if(b == null)
             return;
+        
+        // get the velocity of the second entity
         Vector3f velocityB = b.getRigidBody().getLinearVelocity(null);
    
+        // if either a or b is the wall
         if(a.getName().startsWith("Wall_") || b.getName().startsWith("Wall_")) {
+            // check the dot product of the velocity and the normal of the wall to check 
+            // if realistically a bounce sound would be played
             Vector3f out = new Vector3f(0, 0,0);
             ManifoldPoints.getNormalWorldOnB(pointId, out);
             if(out.y > 0.1f || out.y < -0.1f)
@@ -59,6 +67,8 @@ public class GolfPhysics extends PhysicsSpace {
             float angleOfCollision = out.dot(velocityB);
             if(angleOfCollision < 0.2f)
                 return;
+
+            // play a random bounce sound
             int r = random.nextInt(3) + 1;
             if(!Launcher.getGame().audioSources.get("bounce" + r).isPlaying())
                 Launcher.getGame().audioSources.get("bounce" + r).play();

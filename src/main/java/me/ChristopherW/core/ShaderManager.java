@@ -18,7 +18,9 @@ public class ShaderManager {
     private String vertexPath, fragmentPath;
 
     private final Map<String, Integer> uniforms;
+
     public ShaderManager(String vertexPath, String fragmentPath) throws Exception {
+        // create a new shader program using the vertex and fragment shaders given
         this.vertexPath = vertexPath;
         this.fragmentPath = fragmentPath;
         programID = GL20.glCreateProgram();
@@ -28,6 +30,9 @@ public class ShaderManager {
         uniforms = new HashMap<>();
     }
 
+    // ***
+    // multiple different forms of Uniform methods as an object uniform has multiple properties that need to be created
+    // ***
     public void createUniform(String uniformName) throws Exception {
         int uniformLocation = GL20.glGetUniformLocation(programID, uniformName);
         if(uniformLocation < 0)
@@ -42,7 +47,6 @@ public class ShaderManager {
         createUniform(uniformName + ".linear");
         createUniform(uniformName + ".exponent");
     }
-
     public void createPointLightListUniform(String uniformName, int size) throws Exception {
         for(int i = 0; i < size; i++) {
             createPointLightUniform(uniformName + "[" + i + "]");
@@ -63,7 +67,6 @@ public class ShaderManager {
         createUniform(uniformName + ".direction");
         createUniform(uniformName + ".intensity");
     }
-
     public void createMaterialUniform(String uniformName) throws Exception {
         createUniform(uniformName + ".ambient");
         createUniform(uniformName + ".diffuse");
@@ -72,6 +75,9 @@ public class ShaderManager {
         createUniform(uniformName + ".reflectability");
     }
 
+    // ***
+    // multiple different forms of Uniform methods as each type identifier requires a different method
+    // ***
     public void setUniform(String uniformName, Matrix3f value) {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             GL20.glUniformMatrix3fv(uniforms.get(uniformName), false, value.get(stack.mallocFloat(9)));
@@ -134,7 +140,6 @@ public class ShaderManager {
             setUniform(uniformName, lights[i], i);
         }
     }
-
     public void setUniform(String uniformName, PointLight light, int pos) {
         setUniform(uniformName + "[" + pos + "]", light);
     }
@@ -144,11 +149,11 @@ public class ShaderManager {
             setUniform(uniformName, lights[i], i);
         }
     }
-
     public void setUniform(String uniformName, SpotLight light, int pos) {
         setUniform(uniformName + "[" + pos + "]", light);
     }
 
+    // create vertex and fragment shaders
     public void createVertexShader(String shaderCode) throws Exception {
         vertexShaderID = createShader(shaderCode, GL20.GL_VERTEX_SHADER);
     }
@@ -156,6 +161,7 @@ public class ShaderManager {
         fragmentShaderID = createShader(shaderCode, GL20.GL_FRAGMENT_SHADER);
     }
 
+    // take the shader code as a string, compile, and attach it to the shader program
     public int createShader(String shaderCode, int shaderType) throws Exception {
         int shaderID = GL20.glCreateShader(shaderType);
         if(shaderID == 0)
@@ -173,6 +179,7 @@ public class ShaderManager {
     }
 
     public void link() throws Exception {
+        // link the shader program to connect the inputs and outputs of the sub-shaders (Vertex and Fragment) 
         GL20.glLinkProgram(programID);
         if(GL20.glGetProgrami(programID, GL20.GL_LINK_STATUS) == 0)
             throw new Exception("Unable to link shader. Info: " + GL20.glGetProgramInfoLog(programID, 1024));
@@ -200,14 +207,17 @@ public class ShaderManager {
     }
 
     public void init() throws Exception {
+        // load sub-shaders from resource
         createVertexShader(Utils.loadResource(vertexPath));
         createFragmentShader(Utils.loadResource(fragmentPath));
     }
 
     public void start() {
+        // setup shader
         try {
             this.init();
             this.link();
+            // create default shader uniforms
             this.createUniform("textureSampler");
             this.createUniform("transformationMatrix");
             this.createUniform("projectionMatrix");

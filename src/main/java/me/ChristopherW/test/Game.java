@@ -1,12 +1,32 @@
 package me.ChristopherW.test;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
+import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.openal.AL11;
+import org.lwjgl.opengl.GL11;
+
+import com.jme3.bullet.PhysicsSpace;
+
 import imgui.ImGui;
 import imgui.flag.ImGuiConfigFlags;
-import me.ChristopherW.core.*;
-import me.ChristopherW.core.custom.Hole;
+import me.ChristopherW.core.Camera;
+import me.ChristopherW.core.GolfPhysics;
+import me.ChristopherW.core.ILogic;
+import me.ChristopherW.core.MouseInput;
+import me.ChristopherW.core.ObjectLoader;
+import me.ChristopherW.core.RenderManager;
+import me.ChristopherW.core.ShaderManager;
+import me.ChristopherW.core.WindowManager;
 import me.ChristopherW.core.custom.CourseManager;
-import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.GolfBall;
+import me.ChristopherW.core.custom.Hole;
+import me.ChristopherW.core.custom.UIScreens.SInGame;
 import me.ChristopherW.core.entity.Entity;
 import me.ChristopherW.core.entity.Texture;
 import me.ChristopherW.core.sound.SoundBuffer;
@@ -15,18 +35,6 @@ import me.ChristopherW.core.sound.SoundManager;
 import me.ChristopherW.core.sound.SoundSource;
 import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.core.utils.Utils;
-import me.ChristopherW.core.custom.UIScreens.SInGame;
-
-import com.jme3.bullet.PhysicsSpace;
-
-import org.joml.Vector3f;
-
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.openal.AL11;
-import org.lwjgl.opengl.GL11;
-
-import java.awt.*;
-import java.util.*;
 
 public class Game implements ILogic {
     private final RenderManager renderer;
@@ -42,29 +50,38 @@ public class Game implements ILogic {
     private Camera camera;
     public static Texture defaultTexture;
 
-    Vector3f cameraInc;
-
     public Game() throws Exception {
+        // create new instances for these things
         renderer = new RenderManager();
         window = Launcher.getWindow();
         loader = new ObjectLoader();
         courseManager = new CourseManager();
+
+        // setup sound system
         soundManager = new SoundManager();
         soundManager.setAttenuationModel(AL11.AL_EXPONENT_DISTANCE);
 
+        // reference the course manager from the gui manager
         window.guiManager.cm = courseManager;
+
+        // create new physics space with custom collision callbacks
         physicsSpace = new GolfPhysics(PhysicsSpace.BroadphaseType.DBVT);
         physicsSpace.getSolverInfo().setSplitImpulseEnabled(true);
         physicsSpace.setGravity(new com.jme3.math.Vector3f(0, GlobalVariables.GRAVITY, 0));
 
+        // create new camera
         camera = new Camera();
-        cameraInc = new Vector3f(0,0,0);
+
+        // set setup the sound listener to be at the world origin and load the audio sounds
         soundManager.setListener(new SoundListener(new Vector3f(0, 0, 0)));
         loadSounds();   
     }
 
     void loadSounds() {
         try {
+            // load the sound file to a buffer, then create a new audio source at the world origin with the buffer attached
+            // store that sound source to a map of sounds
+            // repeat this for each sound file
             SoundBuffer golfHit1Buffer = new SoundBuffer("assets/sounds/golfHit1.ogg");
             soundManager.addSoundBuffer(golfHit1Buffer);
             SoundSource golfHit1Source = new SoundSource(false, false);
@@ -145,8 +162,8 @@ public class Game implements ILogic {
 
     @Override
     public void init() throws Exception {
-        renderer.init();
 
+        // load all the textures
         defaultTexture = new Texture(loader.loadTexture("assets/textures/DefaultTexture.png"));
         Texture courseTexture1 = new Texture(loader.loadTexture("assets/textures/GolfCourse.png"));
         Texture courseTexture2 = new Texture(loader.loadTexture("assets/textures/GolfCourse2.png"));
@@ -158,8 +175,10 @@ public class Game implements ILogic {
         Texture courseTexture8 = new Texture(loader.loadTexture("assets/textures/GolfCourse8.png"));
         Texture courseTexture9 = new Texture(loader.loadTexture("assets/textures/GolfCourse9.png"));
 
+        // initialize entities map
         entities = new HashMap<>();
 
+        // load all the course holes
         courseManager.AddHole(new Hole(new Vector3f(0, 0, -1), loader.loadModel("assets/models/ground.obj", courseTexture1), loader.loadModel("assets/models/walls.obj", courseTexture1), loader, physicsSpace));
         courseManager.AddHole(new Hole(new Vector3f(0, 0, -1), loader.loadModel("assets/models/ground2.obj", courseTexture2), loader.loadModel("assets/models/walls2.obj", courseTexture2), loader, physicsSpace));
         courseManager.AddHole(new Hole(new Vector3f(1, 0, 0), loader.loadModel("assets/models/ground3.obj", courseTexture3), loader.loadModel("assets/models/walls3.obj", courseTexture3), loader, physicsSpace));
@@ -172,53 +191,44 @@ public class Game implements ILogic {
         entities.putAll(courseManager.InitHoles());
     }
 
-    SoundSource getRandomHitSound() {
-        Random random = new Random();
-        switch(random.nextInt(3)) {
-            case 0:
-                return audioSources.get("golfHit1");
-            case 1:
-                return audioSources.get("golfHit2");
-            case 2:
-                return audioSources.get("golfHit3");
-        }
-        return audioSources.get("golfHit1");
-    }
-
     public void startGame() throws Exception {
+        // load some more textures
         Texture shotMeterHeadTexture = new Texture(loader.loadTexture("assets/textures/Arrow.png"));
         Texture shotMeterBaseTexture = new Texture(loader.loadTexture("assets/textures/ArrowBase.png"));
         Texture ballTexture = new Texture(loader.loadTexture("assets/textures/GolfBall.png"));
 
+        // for each player, set the color to the default ball colors and create a new colored texture with that color
         for(int i = 0; i < GlobalVariables.PLAYER_COUNT; i++) {
-            Color color = new Color(255,255,255);
-            if(GlobalVariables.RANDOM_COLORS || i >= 12) {
-                Random rand = new Random();
-                float r = rand.nextFloat();
-                float g = rand.nextFloat();
-                float b = rand.nextFloat();
-                color = new Color(r,g,b);
-            } else {
-                color = GlobalVariables.DEFAULT_BALL_COLORS[i];
-            }
+        Random rand = new Random();
+            float r = rand.nextFloat();
+            float g = rand.nextFloat();
+            float b = rand.nextFloat();
+            Color color = (i < 12 ? GlobalVariables.DEFAULT_BALL_COLORS[i] : new Color(r,g,b));
             Texture texture = new Texture(loader.loadTextureColor(color));
             GolfBall ball = courseManager.AddBall(color, texture, loader, physicsSpace);
             ball.setEnabled(false);
         }
 
+        // set the first player's ball to enabled
         courseManager.GetBall(0).setEnabled(true);
+
+        // update GUI elements
         ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", 1));
         ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", 1));
         ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", 0));
 
+        // put all the balls into the entities map
         entities.putAll(courseManager.InitBalls());
 
+        // create shotmeter entities
         Entity arrowBaseEntity = new Entity(loader.loadModel("assets/models/quad.obj", shotMeterBaseTexture), new Vector3f(0,0.4f,0), new Vector3f(0,0,0), new Vector3f(0.4f,1,1), physicsSpace);
         Entity arrowHeadEntity = new Entity(loader.loadModel("assets/models/quad.obj", shotMeterHeadTexture), new Vector3f(0,0.4f,0), new Vector3f(0,0,0), new Vector3f(0.1f,1,0.1f), physicsSpace);
         Entity previewEntity = new Entity(loader.loadModel("assets/models/ball.obj", ballTexture), new Vector3f(0,0.4f,0), new Vector3f(0,0,0), new Vector3f(0.05f,0.05f,0.05f), physicsSpace);
         previewEntity.setVisible(false);
         arrowHeadEntity.setVisible(false);
         arrowBaseEntity.setVisible(false);
+        
+        // setup shotmeter shaders
         arrowBaseEntity.getModel().setShader(new ShaderManager("/shaders/vertex.glsl", "/shaders/shotmeterFrag.glsl"));
         arrowBaseEntity.getModel().getShader().start();
         arrowBaseEntity.getModel().getShader().createUniform("power");
@@ -227,78 +237,68 @@ public class Game implements ILogic {
         arrowHeadEntity.getModel().getShader().start();
         arrowHeadEntity.getModel().getShader().createUniform("power");
         arrowHeadEntity.setName("ShotmeterHead");
+
+        // add the shotmeter and its components to the map of entities
         entities.put("Preview", previewEntity);
         entities.put("ShotmeterHead", arrowHeadEntity);
         entities.put("ShotmeterBase", arrowBaseEntity);
     }
 
-    final float DIST = 500f;
-    public float dist = 0;
-    float minVel = 0.25f;
-    float friction = 1f;
-    public float rotation = 0;
-    Vector3f start = null;
+    final float DIST = 500f; // MAX POWER
+    public float dist = 0; // CURRENT POWER 
+    float minVel = 0.25f; // VELOCITY THRESHOLD TO ROUND TO ZERO
+    float friction = 1f; // FRICTION MULTIPLIER
+    public float rotation = 0; // CAMERA ROTATION
+    Vector3f start = null; // START POINT FOR A BALL'S JOURNEY
+
     @Override
     public void input(MouseInput input, double deltaTime, int frame) {
+        // if the game hasn't started yet, don't do game inputs
         if(!GlobalVariables.inGame || window.guiManager.currentScreen == "Options" || window.guiManager.currentScreen == "GameOver") {
             return;
         }
 
-        cameraInc.set(0,0,0);
-        GolfBall activeBall = courseManager.GetActiveBall();
-        Entity preview = entities.get("Preview");
-
+        // rotate the camera based on the mouse input
         rotation -= input.getDisplVec().y * GlobalVariables.MOUSE_SENSITIVITY_X;
-        if(window.isKeyPressed(GLFW.GLFW_KEY_UP)) {
-            radius = Utils.clamp(radius -= deltaTime * 10, 1, 100);
-        }
-        if(window.isKeyPressed(GLFW.GLFW_KEY_DOWN)) {
-            radius = Utils.clamp(radius += deltaTime * 10, 1, 100);
-        }
 
-        if(window.isKeyPressed(GLFW.GLFW_KEY_1))
-            activeBall.teleportHole(0, courseManager, window);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_2))
-            activeBall.teleportHole(1, courseManager, window);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_3))
-            activeBall.teleportHole(2, courseManager, window);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_4))
-            activeBall.teleportHole(3, courseManager, window);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_5))
-            activeBall.teleportHole(4, courseManager, window);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_6))
-            activeBall.teleportHole(5, courseManager, window);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_7))
-            activeBall.teleportHole(6, courseManager, window);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_8))
-            activeBall.teleportHole(7, courseManager, window);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_9))
-            activeBall.teleportHole(8, courseManager, window);
-
+        // get the current player whos turn it is
+        GolfBall activeBall = courseManager.GetActiveBall();
+        // get the shot meter entity
+        Entity preview = entities.get("Preview");
         Entity shotMeterHead = entities.get("ShotmeterHead");
         Entity shotMeterBase = entities.get("ShotmeterBase");
+
+        // check if the ball is stationary
         if(Math.abs(activeBall.getRigidBody().getLinearVelocity(null).x) < minVel && Math.abs(activeBall.getRigidBody().getLinearVelocity(null).z) < minVel) {
+            
+            // fully stop the ball
+            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+            
+            // check if the ball just stopped rolling
             if(start != null) {
-                Vector3f end = activeBall.getPosition();
-                float distance = activeBall.getPosition().distance(courseManager.GetHole(activeBall.getCurrentHoleID()).getHolePosition());
                 start = null;
-                activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
-                activeBall.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+
+                // next players turn
                 if(!courseManager.finishedBalls.contains(courseManager.GetBallID(activeBall)))
                     courseManager.NextBall();
                 activeBall = courseManager.GetActiveBall();
-                ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
-                ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
-                ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
-                ((SInGame) window.guiManager.screens.get("InGame")).setPlayerID(courseManager.GetBallID(activeBall));
                 if(activeBall.isFirstShot()) {
                     activeBall.setEnabled(true);
                     activeBall.setFirstShot(false);
                 }
+
+                // update GUI elements
+                ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
+                ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
+                ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
+                ((SInGame) window.guiManager.screens.get("InGame")).setPlayerID(courseManager.GetBallID(activeBall));
+                
                 return;
             }
-            activeBall.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
+            
+            // if mouse button is down, activate the shot meter
             if(input.isLeftButtonPress()) {
+                // move an invisible point to where the ball will travel towards
                 preview.setPosition(activeBall.getPosition());
                 dist += (input.getDisplVec().x * GlobalVariables.MOUSE_SENSITIVITY_Y);
                 dist = Utils.clamp(dist, 0, DIST);
@@ -311,6 +311,8 @@ public class Game implements ILogic {
                 baseOrbit.x = (float) (dist * -0.005f * Math.sin(Math.toRadians(rotation))) + ballLoc.x;
                 baseOrbit.y = ballLoc.y;
                 baseOrbit.z = (float) (dist * -0.005f * Math.cos(Math.toRadians(rotation))) + ballLoc.z;
+
+                // scale the shot meter based on poewr
                 shotMeterBase.setPosition(baseOrbit);
                 shotMeterBase.setRotation(0, rotation, 0);
                 shotMeterBase.setScale(0.0795f,1,dist * 0.005f);
@@ -325,41 +327,66 @@ public class Game implements ILogic {
                     shotMeterHead.setVisible(true);
                 preview.setPosition(orbitVec);
             } else {
+                // hide the shot meter
                 shotMeterHead.setVisible(false);
                 shotMeterBase.setVisible(false);
-                preview.setVisible(false);
+
+                // if the shot meter had power
                 if(dist > 0) {
+
+                    // clamp the power to the max power (500)
                     dist = Utils.clamp(dist, 0, DIST);
+                    
+                    // save the ball start position
                     preview.localTranslate(0, 0, -0.01f * dist, camera.getRotation());
                     start = new Vector3f(activeBall.getPosition());
+
+                    // calculate the velocity that will be applied to the ball
                     Vector3f vel = preview.getPosition().sub(activeBall.getPosition()).mul(4f);
                     vel.y = 0;
                     activeBall.getRigidBody().applyCentralImpulse(Utils.convert(vel));
                     activeBall.setStartTime(System.nanoTime());
+
+                    // store the shot strength
                     activeBall.setShotStrength(dist / DIST);
 
+                    // update GUI element
                     activeBall.setScore(activeBall.getCurrentHoleID(), activeBall.getScore(activeBall.getCurrentHoleID()) + 1);
                     ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
 
-                    getRandomHitSound().play();
+                    // play a randomized hit sound
+                    Random random = new Random();
+                    audioSources.get(String.format("golfHit%d", random.nextInt(3) + 1)).play();
                 }
+                // reset the power to 0
                 dist = 0;
             }
         }
+
+        // for each ball on the field, do some checks
         for(int i = 0; i < courseManager.GetBallCount(); i++) {
             GolfBall ball = courseManager.GetBall(i);
+
+            // ignore disabled balls
             if(!ball.isEnabled())
                 continue;
 
+            // if the ball is out of bounds, reset the ball and add a stroke
             if(ball.getPosition().y < -2) {
                 ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
                 ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
                 ball.setPosition(courseManager.GetHole(ball.getCurrentHoleID()).getStartPos());
                 ball.setScore(ball.getCurrentHoleID(), ball.getScore(ball.getCurrentHoleID()) + 1);
             }
+
+            // check if the ball is in the hole
             if(ball.getPosition().distance(courseManager.GetHole(ball.getCurrentHoleID()).getHolePosition()) < 0.25f) {
+                // stop the ball
                 ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
                 ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
+
+                // if there are no players left for that hole, clear the finished players list
+                // then check if the last hole was completed, showing the game over screen 
                 if(courseManager.currentBalls.isEmpty()) {
                     courseManager.currentBalls = new ArrayList<>(courseManager.finishedBalls);
                     courseManager.finishedBalls.clear();
@@ -375,31 +402,50 @@ public class Game implements ILogic {
                     }
                 }
 
+                // if there is following hole, move the ball to that hole
                 if(ball.getCurrentHoleID() < courseManager.GetHoleCount() - 1) {
                     ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
                     ball.setPosition(courseManager.GetHole(ball.getCurrentHoleID()).getStartPos());
                 }
+
+                // hide the ball 
                 ball.setEnabled(false);
                 ball.setFirstShot(true);
+
+                // if the ball is my ball, go to the next ball
                 if(activeBall == ball)
                     courseManager.NextBall();
+                // if the ball isn't in the list of finished players, add it to that list
                 if(!courseManager.finishedBalls.contains(courseManager.GetBalls().indexOf(ball)))
                     courseManager.BallFinish(ball);
+
+                // get the new ball of whoever's turn it is
                 activeBall = courseManager.GetActiveBall();
+
+                // update GUI elements
                 ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
                 ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
                 ((SInGame) window.guiManager.screens.get("InGame")).setPlayerID(courseManager.GetBallID(activeBall));
                 ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
+                
+                // clear the start position
                 start = null;
+
+                // show the new player's ball if it is their first time shooting
                 if(activeBall.isFirstShot()) {
                     activeBall.setEnabled(true);
                     activeBall.setFirstShot(false);
                 }
             }
+            // get current velocity
             com.jme3.math.Vector3f temp = ball.getRigidBody().getLinearVelocity(null);
+            // use that velocity to apply friction
             ball.getRigidBody().setLinearVelocity(new com.jme3.math.Vector3f((float) (temp.x * (1 / (1 + (deltaTime * friction)))), temp.y, (float) (temp.z * (1 / (1 + (deltaTime * friction))))));
         }
 
+
+        // for each entity in the world
+        // sync the visual rotation and positions with the physics rotations and positions
         for(Entity entity : entities.values()) {
             if(entity.getRigidBody() != null) {
                 entity.setPosition(Utils.convert(entity.getRigidBody().getPhysicsLocation(null)));
@@ -408,14 +454,20 @@ public class Game implements ILogic {
                     entity.setRotation(Utils.convert(entity.getRigidBody().getLinearVelocity(null)).cross(new Vector3f(0, 1, 0)).mul(200));
             }
         }
+
+        // update the physics world
         physicsSpace.update((float) deltaTime, 2, false, true, false);
     }
+
+
     float radius = 7.5f;
     float theta = 0.0f;
     @Override
     public void update(float inteveral, MouseInput mouseInput) {
         
+        // if we are in game
         if(GlobalVariables.inGame) {
+            // orbit the camera around the active ball
             Vector3f orbitVec = new Vector3f();
             orbitVec.x = (float) (radius * Math.sin(Math.toRadians(rotation))) + courseManager.GetActiveBall().getPosition().x;
             orbitVec.y = radius;
@@ -423,18 +475,20 @@ public class Game implements ILogic {
             camera.setPosition(orbitVec);
             camera.setRotation(30f, -rotation, camera.getRotation().z);
         } else {
-            float multiplier = 2.0f;
-            if(window.isKeyPressed(GLFW.GLFW_KEY_SPACE))
-                multiplier = 1000.0f;
+            // slowly rotate the camera in the main menu, similar to Minecraft's splash screen
+            float speedMultiplier = 2.0f;
+            if(window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) // little easter egg/debug to view all the holes
+                speedMultiplier = 1000.0f;
             Vector3f orbitVec = new Vector3f();
             orbitVec.x = (float) (25 * Math.sin(Math.toRadians(theta))) + 20;
             orbitVec.y = 25;
             orbitVec.z = (float) (25 * Math.cos(Math.toRadians(theta))) - 20;
             camera.setPosition(orbitVec);
             camera.setRotation(30f, -theta, camera.getRotation().z);
-            theta += inteveral * multiplier;
+            theta += inteveral * speedMultiplier;
         }
 
+        // for each visible entity in the world, process its data before rendered
         for(Entity entity : entities.values()) {
             if(entity.isVisible())
                 renderer.processEntity(entity);
@@ -443,12 +497,19 @@ public class Game implements ILogic {
 
     @Override
     public void render() throws Exception {
+        // if the window was resized, update the OpenGL viewport to match
         if(window.isResize()) {
             GL11.glViewport(0,0, window.getWidth(), window.getHeight());
             window.setResize(true);
         }
+
+        // set the clear color to the sky color
         GL11.glClearColor(GlobalVariables.BG_COLOR.x, GlobalVariables.BG_COLOR.y, GlobalVariables.BG_COLOR.z, GlobalVariables.BG_COLOR.w);
+        
+        // render to the OpenGL viewport from the perspective of the camera
         renderer.render(camera);
+
+        // update the render of the ImGui frame
         window.imGuiGlfw.newFrame();
         ImGui.newFrame();
         window.guiManager.render();

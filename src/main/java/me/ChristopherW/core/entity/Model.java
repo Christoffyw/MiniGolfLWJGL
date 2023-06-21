@@ -11,7 +11,7 @@ public class Model {
     private float[] vertices;
     private float[] textureCoords;
     private float[] normals;
-    private int[] indicies;
+    private int[] indices;
 
     public void init() {
         try {
@@ -107,12 +107,12 @@ public class Model {
         this.normals = normals;
     }
 
-    public int[] getIndicies() {
-        return indicies;
+    public int[] getIndices() {
+        return indices;
     }
 
-    public void setIndicies(int[] indicies) {
-        this.indicies = indicies;
+    public void setIndices(int[] indices) {
+        this.indices = indices;
     }
 
     public String getPath() {

@@ -1,7 +1,6 @@
 package me.ChristopherW.core.custom.UIScreens;
 
 import java.nio.IntBuffer;
-import java.util.Arrays;
 import java.util.prefs.Preferences;
 
 import org.joml.Vector2i;
@@ -12,14 +11,10 @@ import org.lwjgl.system.MemoryUtil;
 
 import imgui.ImGui;
 import imgui.ImVec2;
-import imgui.flag.ImGuiComboFlags;
-import imgui.flag.ImGuiDataType;
-import imgui.flag.ImGuiSelectableFlags;
 import imgui.flag.ImGuiSliderFlags;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import me.ChristopherW.core.custom.GUIManager;
 import me.ChristopherW.core.custom.IGUIScreen;
 import me.ChristopherW.core.sound.SoundSource;

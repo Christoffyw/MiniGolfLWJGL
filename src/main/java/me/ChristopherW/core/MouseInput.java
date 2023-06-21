@@ -4,7 +4,6 @@ import me.ChristopherW.core.utils.GlobalVariables;
 import me.ChristopherW.test.Launcher;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 public class MouseInput {
@@ -14,22 +13,28 @@ public class MouseInput {
     private boolean inWindow = false, leftButtonPress = false, rightButtonPress = false;
 
     public MouseInput() {
+        // init variables
         this.previousPos = new Vector2d(GlobalVariables.WIDTH/2, GlobalVariables.HEIGHT/2);
         this.currentPos = new Vector2d(GlobalVariables.WIDTH/2,GlobalVariables.HEIGHT/2);
         this.displVec = new Vector2f();
     }
 
     public void init() {
+        // set the mouse to the center of the window
         GLFW.glfwSetCursorPos(Launcher.getWindow().getWindow(), GlobalVariables.WIDTH/2, GlobalVariables.HEIGHT/2);
+
+        // set the callback for mouse movement to store the position
         GLFW.glfwSetCursorPosCallback(Launcher.getWindow().getWindow(), (window, xpos, ypos) -> {
             this.currentPos.x = xpos;
             this.currentPos.y = ypos;
         });
 
+        // set the callback for whent he mouse enters the window
         GLFW.glfwSetCursorEnterCallback(Launcher.getWindow().getWindow(), (window, entered) -> {
             this.inWindow = entered;
         });
 
+        // set the mouse click callbacks to store the result
         GLFW.glfwSetMouseButtonCallback(Launcher.getWindow().getWindow(), (window, button, action, mods) -> {
             this.leftButtonPress = button == GLFW.GLFW_MOUSE_BUTTON_1 && action == GLFW.GLFW_PRESS;
             this.rightButtonPress = button == GLFW.GLFW_MOUSE_BUTTON_2 && action == GLFW.GLFW_PRESS;
@@ -37,6 +42,8 @@ public class MouseInput {
     }
 
     public void input() {
+        // to summarize
+        // capture the distance moved from the center of the screen when the mouse is disabled
         this.displVec.x = 0;
         this.displVec.y = 0;
         double x = this.currentPos.x - this.previousPos.x;

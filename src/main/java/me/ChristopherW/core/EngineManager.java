@@ -24,17 +24,22 @@ public class EngineManager {
         // add a GLFW error callback for debugging
         GLFW.glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
 
-        // initialize variables
+        // get the window, game and input instances
         window = Launcher.getWindow();
         gameLogic = Launcher.getGame();
         mouseInput = new MouseInput();
+
+        // initalize the window, game, and input manager
         window.init();
         gameLogic.init();
         mouseInput.init();
+
+        // set the seconds per frame based on the current framerate preference
         frametime = 1.0f / GlobalVariables.FRAMERATE;
     }
     
     public void ForceUpdateFramerate() {
+        // update the seconds per frame based on the current framerate preference
         frametime = 1.0f / GlobalVariables.FRAMERATE;
     }
 

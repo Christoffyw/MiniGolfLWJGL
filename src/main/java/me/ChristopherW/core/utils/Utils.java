@@ -87,6 +87,8 @@ public class Utils {
 
         return angles;
     }
+
+    // algorithm to convert a Euler angle to a Quaternion angle
     public static org.joml.Quaternionf ToQuaternion(org.joml.Vector3f vector) {
         double cr = Math.cos(vector.x * 0.5);
         double sr = Math.sin(vector.x * 0.5);

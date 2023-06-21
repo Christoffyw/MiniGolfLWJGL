@@ -37,7 +37,7 @@ public class SInGame implements IGUIScreen {
     @Override
     public void render(ImBoolean p_open, GUIManager gm) {
         if (ImGui.begin("UI", p_open, gm.window_flags)) {
-            ImGui.image(ballTextures[playerID].getId(), 64, 64);
+            ImGui.image(playerID < 12 ? ballTextures[playerID].getId() : ballTextures[0].getId(), 64, 64);
             ImGui.text(playerText);
             ImGui.dummy(100, 50);
             ImGui.text(holeText);
@@ -71,7 +71,7 @@ public class SInGame implements IGUIScreen {
                                 ImGui.text(String.format("%d", column - 1));
                         } else {
                             if (column == 0)
-                                ImGui.image(ballTextures[row - 1].getId(), 16, 16);
+                                ImGui.image(row - 1 < 12 ? ballTextures[row - 1].getId() : ballTextures[0].getId(), 16, 16);
                             else if (column == 1)
                                 ImGui.text(String.format("Player  %d    ", row));
                             else if (column == courseManager.GetHoleCount() + 2)

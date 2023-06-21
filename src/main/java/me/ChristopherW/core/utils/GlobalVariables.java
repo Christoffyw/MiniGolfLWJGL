@@ -26,7 +26,6 @@ public class GlobalVariables {
     public static final float MOUSE_SENSITIVITY_Y = 0.25f;
 
     public static int PLAYER_COUNT = 1; // MAX 12
-    public static boolean RANDOM_COLORS = false;
     public static Color[] DEFAULT_BALL_COLORS = {
         new Color(0,100,255),   // Blue
         new Color(255,35,35),   // Red

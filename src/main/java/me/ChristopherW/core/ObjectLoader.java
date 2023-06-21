@@ -19,11 +19,8 @@ import org.lwjgl.system.MemoryStack;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -40,37 +37,56 @@ public class ObjectLoader {
     private List<Integer> textures = new ArrayList<>();
 
     public IndexedMesh loadIndexedMesh(Model model, Vector3f scale) {
-
+        // create a new array of Vector3s the size of the amount of verticies the model has
         com.jme3.math.Vector3f[] verticiesArr = new com.jme3.math.Vector3f[model.getVertices().length / 3];
+
+        // move the data from the array of floats to the array of Vector3s
         for(int i = 0; i < model.getVertices().length; i += 3) {
             Vector3f vertex = new Vector3f(model.getVertices()[i], model.getVertices()[i + 1], model.getVertices()[i + 2]);
             verticiesArr[i / 3] = new com.jme3.math.Vector3f(vertex.x * scale.x, vertex.y * scale.y, vertex.z * scale.z);
         }
-        return new IndexedMesh(verticiesArr, model.getIndicies());
+
+        // pass the data into an IndexedMesh for the physics engine to register
+        return new IndexedMesh(verticiesArr, model.getIndices());
     }
+
     public int loadModel(float[] vertices, float[] textureCoords) {
+        // create a new VAO and store it's id
         int id = createVAO();
+
+        // store the vertices and texCoords in its VBOs
         storeDataInAttribList(0, 2, vertices);
         storeDataInAttribList(1, 2, textureCoords);
+
+        // unbind the VAO
         unbind();
         return id;
     }
-    public Model loadModel(float[] vertices, float[] textureCoords, float[] normals, int[] indicies, Texture texture, String path) {
+    public Model loadModel(float[] vertices, float[] textureCoords, float[] normals, int[] indices, Texture texture, String path) {
+        // create a new VAO and store its id
         int id = createVAO();
-        storeInticiesBuffer(indicies);
+
+        // store the vertices, texCoords, and normals in VBOs
+        storeInticiesBuffer(indices);
         storeDataInAttribList(0, 3, vertices);
         storeDataInAttribList(1, 2, textureCoords);
         storeDataInAttribList(2, 3, normals);
+
+        // unbind the VAO
         unbind();
-        Model model = new Model(id, indicies.length, path);
+
+        // create a new model and store the VAO (with its VBOs) in it
+        Model model = new Model(id, indices.length, path);
         model.setVertices(vertices);
         model.setTextureCoords(textureCoords);
         model.setNormals(normals);
-        model.setIndicies(indicies);
+        model.setIndices(indices);
         model.getMaterial().setTexture(texture);
         return model;
     }
+
     public Vector3f getHoleLocation(Model model) {
+        // Scan a hole's ground OBJ data to find where hole is positioned in local space
         Vector3f holePosition = new Vector3f(0,0,0);
         String modelPath = model.getPath();
         try {
@@ -88,9 +104,12 @@ public class ObjectLoader {
         return holePosition;
     }
     public Model loadModel(String modelPath) {
+        // if no texture is provided, use the default texture
         return loadModel(modelPath, Game.defaultTexture);
     }
+
     public Model loadModel(String modelPath, Texture texture) {
+        // using LWJGL's ASSIMP module, we can extract the vertices, normals, texCoords, and indiies 
         File file = new File(modelPath);
         if (!file.exists()) {
             throw new RuntimeException("Model path does not exist [" + modelPath + "]");
@@ -121,11 +140,6 @@ public class ObjectLoader {
         }
         return null;
     }
-
-    private Model loadModel(float[] vertices, float[] textCoords, float[] normals, int[] indices) {
-        return loadModel(vertices, textCoords, normals, indices, Game.defaultTexture, "");
-    }
-
     private static float[] processNormals(AIMesh aiMesh) {
         AIVector3D.Buffer buffer = aiMesh.mNormals();
         float[] data = new float[buffer.remaining() * 3];
@@ -165,7 +179,6 @@ public class ObjectLoader {
         }
         return data;
     }
-
     private static float[] processVertices(AIMesh aiMesh) {
         AIVector3D.Buffer buffer = aiMesh.mVertices();
         float[] data = new float[buffer.remaining() * 3];
@@ -180,23 +193,24 @@ public class ObjectLoader {
     }
 
     public int loadTextureColor(Color color) {
+        // create a new solid color image of the color provided
         int width = 16, height = 16;
         try {
             BufferedImage img = ImageIO.read(new File("assets/textures/DefaultTexture.png"));
-            // Obtain the Graphics2D context associated with the BufferedImage.
+            // get the Graphics context from the BufferedImage
             Graphics2D g = img.createGraphics();
 
             g.setColor(color);
             g.fillRect(0, 0, width, height);
 
-            // Clean up -- dispose the graphics context that was created.
+            // dispose the graphics context that was created
             ImageIO.write(img, "png", new File("assets/textures/temp.png"));
             g.dispose();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-
+        // load the BufferedImage into a readable texture for GLFW
         ByteBuffer buffer;
         try(MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
@@ -226,6 +240,7 @@ public class ObjectLoader {
     }
 
     public GLFWImage loadtextureBuffer(String iconPath) {
+        // load an icon texture from a file using STBI for GLFW
         int width, height;
         ByteBuffer buffer;
         try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -247,6 +262,7 @@ public class ObjectLoader {
         return image;
     }
     public int loadTexture(String file) throws Exception {
+        // load a texture from a file using STBI for GLFW
         int width, height;
         ByteBuffer buffer;
         try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -276,12 +292,14 @@ public class ObjectLoader {
     }
 
     private int createVAO() {
+        // generate a VAO
         int id = GL30.glGenVertexArrays();
         vaos.add(id);
         GL30.glBindVertexArray(id);
         return id;
     }
     private void storeInticiesBuffer(int[] data) {
+        // store data into the VBO of the bound VAO
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vbo);
@@ -289,6 +307,7 @@ public class ObjectLoader {
         GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
     }
     private void storeDataInAttribList(int attribNo, int vertexCount, float[] data) {
+        // store data into the VBO of the bound VAO
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
@@ -299,10 +318,12 @@ public class ObjectLoader {
     }
 
     private void unbind() {
+        // unbind VAO
         GL30.glBindVertexArray(0);
     }
 
     public void cleanup() {
+        // delete all textures, VAOs, and VBOs
         for(int vao: vaos)
             GL30.glDeleteVertexArrays(vao);
         for(int vbo: vbos)

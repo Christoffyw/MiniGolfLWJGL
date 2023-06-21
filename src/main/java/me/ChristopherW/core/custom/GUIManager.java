@@ -39,6 +39,8 @@ public class GUIManager {
     public void render() {
         ImBoolean p_open = new ImBoolean();
         ImGui.pushFont(fontSmall);
+
+        // Show FPS text
         if(GlobalVariables.SHOW_FPS) {
             ImGui.setNextWindowPos(0, 0);
             if (ImGui.begin("FPS", p_open, window_flags)) {
@@ -48,6 +50,8 @@ public class GUIManager {
         }
         ImGui.popFont();
         ImGui.pushFont(font);
+
+        // Render current visible screen
         if(currentScreen != "None")
             screens.get(currentScreen).render(p_open, this); 
     }
@@ -57,6 +61,7 @@ public class GUIManager {
         window_flags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
     }
     public void init() {
+        // bunch of font loading stuff
         fontConfig = new ImFontConfig();
         io = ImGui.getIO();
         fontAtlas = io.getFonts();
@@ -69,7 +74,6 @@ public class GUIManager {
         fontConfig.destroy();
 
         // initialize screens
-
         screens.put("MainMenu", new SMainMenu());
         screens.put("Options", new SOptionsMenu());
         screens.put("Credits", new SCredits());
@@ -79,6 +83,7 @@ public class GUIManager {
         screens.put("InGame", sig);
         currentScreen = "MainMenu";
 
+        // call the start method for each screen
         for(IGUIScreen screen : screens.values()) {
             screen.start();
         }
