@@ -15,33 +15,30 @@ import java.util.logging.Logger;
 
 public class Launcher{
     private static WindowManager window;
-
-
     private static Game game;
-    public static Game getGame() {
-        return game;
-    }
-
     private static EngineManager engine;
-    public static EngineManager getEngine() {
-        return engine;
-    }
 
     public static void main(String[] args) throws Exception {
+        // Turn off debugs from the physics engine
         Logger logger = Logger.getLogger(PhysicsRigidBody.class.getName());
         logger.setLevel(Level.OFF);
         logger = Logger.getLogger(PhysicsSpace.class.getName());
         logger.setLevel(Level.OFF);
         logger = Logger.getLogger(NativeLibraryLoader.class.getName());
         logger.setLevel(Level.OFF);
+
+        // Load the physics engine natives
         NativeLibraryLoader.loadLibbulletjme(true, new File("natives/"), "Release", "Sp");
         NativeLibrary.setStartupMessageEnabled(false);
         NativeLibrary.logger.setLevel(Level.OFF);
+
+        // create new window manager, game instance and engine instance
         window = new WindowManager(GlobalVariables.TITLE, GlobalVariables.WIDTH, GlobalVariables.HEIGHT, GlobalVariables.VSYNC);
         game = new Game();
         engine = new EngineManager();
 
 
+        // attempt to start the engine but catch any errors
         try {
             engine.start();
         } catch(Exception e) {
@@ -51,5 +48,11 @@ public class Launcher{
 
     public static WindowManager getWindow() {
         return window;
+    }
+    public static Game getGame() {
+        return game;
+    }
+    public static EngineManager getEngine() {
+        return engine;
     }
 }

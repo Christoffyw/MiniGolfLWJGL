@@ -150,4 +150,30 @@ public class CourseManager {
     public int GetBallID(GolfBall getActiveBall) {
         return balls.indexOf(getActiveBall);
     }
+
+    public int[] getWinners() {
+        ArrayList<GolfBall> leaders = new ArrayList<>();
+        for(int i = 0; i < balls.size(); i++) {
+            GolfBall player = balls.get(i);
+            if(leaders.size() > 0) {
+                for(int l = 0; l < leaders.size(); l++) {
+                    GolfBall leader = leaders.get(l);
+                    if(player.getTotalScore() < leader.getTotalScore()) {
+                        leaders.clear();
+                        leaders.add(player);
+                        break;
+                    } else if(player.getTotalScore() == leader.getTotalScore()) {
+                        leaders.add(player);
+                        break;
+                    }
+                }
+            } else
+                leaders.add(player);
+        }
+        int[] winnerIds = new int[leaders.size()];
+        for(int i = 0; i < leaders.size(); i++) {
+            winnerIds[i] = GetBallID(leaders.get(i));
+        }
+        return winnerIds;
+    }
 }

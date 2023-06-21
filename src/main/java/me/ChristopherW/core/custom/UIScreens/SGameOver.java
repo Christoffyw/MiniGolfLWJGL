@@ -35,7 +35,21 @@ public class SGameOver implements IGUIScreen {
         ImGui.setNextWindowPos(gm.window.getWidth()/2, gm.window.getHeight()/2, 0, 0.5f,0.5f);
         if (ImGui.begin("GameOver", p_open, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoMove)) {
             ImVec2 windowSize = ImGui.getWindowSize();
-            String title = "Player ??? Wins";
+            int[] winnerIds = gm.cm.getWinners();
+            String title = "Game Over";
+            if(winnerIds.length == 1)
+                title = String.format("Player %d Wins", winnerIds[0] + 1);
+            else if (winnerIds.length == 2) {
+                title = String.format("Players %d and %d Win", winnerIds[0] + 1, winnerIds[1] + 1);
+            } else {
+                title = "Players ";
+                for(int i = 0; i < winnerIds.length; i++) {
+                    if(i == winnerIds.length - 1)
+                        title += String.format(" and %d Win", winnerIds[i] + 1);
+                    else
+                        title += String.format(" %d,", winnerIds[i] + 1);
+                }
+            }
             float textWidth = ImGui.calcTextSize(title).x;
             ImVec2 textPosition = new ImVec2((windowSize.x - textWidth) * 0.5f, windowSize.y * 0.5f);
             ImGui.setCursorPos(textPosition.x, ImGui.getCursorPosY());

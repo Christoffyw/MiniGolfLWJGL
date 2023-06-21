@@ -1,5 +1,7 @@
 package me.ChristopherW.core.custom.UIScreens;
 
+import java.util.Currency;
+
 import org.lwjgl.glfw.GLFW;
 
 import imgui.ImGui;
@@ -72,6 +74,8 @@ public class SMainMenu implements IGUIScreen {
 
                     GlobalVariables.inGame = true;
                     gm.currentScreen = "InGame";
+                    SInGame ig = (SInGame)gm.screens.get(gm.currentScreen);
+                    ig.setPlayerID(0);
                     try {
                         Launcher.getGame().startGame();
                     } catch(Exception e) {

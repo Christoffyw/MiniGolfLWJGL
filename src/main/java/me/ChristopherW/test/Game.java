@@ -129,14 +129,14 @@ public class Game implements ILogic {
             audioSources.put("menuMusic", menuMusicSource);
             soundManager.addSoundSource("menuMusic", menuMusicSource);
 
-            golfHit1Source.setGain(0.1f);
-            golfHit2Source.setGain(0.1f);
-            golfHit3Source.setGain(0.1f);
-            bounce1Source.setGain(0.1f);
-            bounce2Source.setGain(0.1f);
-            bounce3Source.setGain(0.1f);
-            menuClickSource.setGain(0.1f);
-            menuMusicSource.setGain(0.3f);
+            golfHit1Source.setGain( 0.4f);
+            golfHit2Source.setGain( 0.4f);
+            golfHit3Source.setGain( 0.4f);
+            bounce1Source.setGain(  0.4f);
+            bounce2Source.setGain(  0.4f);
+            bounce3Source.setGain(  0.4f);
+            menuClickSource.setGain(0.4f);
+            menuMusicSource.setGain(1f);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -287,7 +287,6 @@ public class Game implements ILogic {
                 if(!courseManager.finishedBalls.contains(courseManager.GetBallID(activeBall)))
                     courseManager.NextBall();
                 activeBall = courseManager.GetActiveBall();
-                System.out.println(courseManager.GetBallID(activeBall));
                 ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
                 ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));
                 ((SInGame) window.guiManager.screens.get("InGame")).setStrokeText(String.format("Strokes: %d", activeBall.getScore(activeBall.getCurrentHoleID())));
@@ -349,6 +348,9 @@ public class Game implements ILogic {
         }
         for(int i = 0; i < courseManager.GetBallCount(); i++) {
             GolfBall ball = courseManager.GetBall(i);
+            if(!ball.isEnabled())
+                continue;
+
             if(ball.getPosition().y < -2) {
                 ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
                 ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
@@ -358,16 +360,6 @@ public class Game implements ILogic {
             if(ball.getPosition().distance(courseManager.GetHole(ball.getCurrentHoleID()).getHolePosition()) < 0.25f) {
                 ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
                 ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
-                if(ball.getCurrentHoleID() < courseManager.GetHoleCount() - 1) {
-                    ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
-                    ball.setPosition(courseManager.GetHole(ball.getCurrentHoleID()).getStartPos());
-                }
-                ball.setEnabled(false);
-                ball.setFirstShot(true);
-                if(activeBall == ball)
-                    courseManager.NextBall();
-                if(!courseManager.finishedBalls.contains(courseManager.GetBalls().indexOf(ball)))
-                    courseManager.BallFinish(ball);
                 if(courseManager.currentBalls.isEmpty()) {
                     courseManager.currentBalls = new ArrayList<>(courseManager.finishedBalls);
                     courseManager.finishedBalls.clear();
@@ -382,6 +374,17 @@ public class Game implements ILogic {
                         GLFW.glfwSetInputMode(window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
                     }
                 }
+
+                if(ball.getCurrentHoleID() < courseManager.GetHoleCount() - 1) {
+                    ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
+                    ball.setPosition(courseManager.GetHole(ball.getCurrentHoleID()).getStartPos());
+                }
+                ball.setEnabled(false);
+                ball.setFirstShot(true);
+                if(activeBall == ball)
+                    courseManager.NextBall();
+                if(!courseManager.finishedBalls.contains(courseManager.GetBalls().indexOf(ball)))
+                    courseManager.BallFinish(ball);
                 activeBall = courseManager.GetActiveBall();
                 ((SInGame) window.guiManager.screens.get("InGame")).setHoleText(String.format("Hole %d", activeBall.getCurrentHoleID() + 1));
                 ((SInGame) window.guiManager.screens.get("InGame")).setPlayerText(String.format("Player %d", courseManager.GetBallID(activeBall) + 1));

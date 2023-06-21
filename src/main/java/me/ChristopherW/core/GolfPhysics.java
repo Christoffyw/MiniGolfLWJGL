@@ -47,10 +47,10 @@ public class GolfPhysics extends PhysicsSpace {
             }
         }
 
-
         if(b == null)
             return;
         Vector3f velocityB = b.getRigidBody().getLinearVelocity(null);
+   
         if(a.getName().startsWith("Wall_") || b.getName().startsWith("Wall_")) {
             Vector3f out = new Vector3f(0, 0,0);
             ManifoldPoints.getNormalWorldOnB(pointId, out);
