@@ -385,23 +385,6 @@ public class Game implements ILogic {
                 ball.getRigidBody().setLinearVelocity(com.jme3.math.Vector3f.ZERO);
                 ball.getRigidBody().setAngularVelocity(com.jme3.math.Vector3f.ZERO);
 
-                // if there are no players left for that hole, clear the finished players list
-                // then check if the last hole was completed, showing the game over screen 
-                if(courseManager.currentBalls.isEmpty()) {
-                    courseManager.currentBalls = new ArrayList<>(courseManager.finishedBalls);
-                    courseManager.finishedBalls.clear();
-                    boolean gameFinished = true;
-                    for(int ballIndex : courseManager.currentBalls) {
-                        if(courseManager.GetBall(ballIndex).getCurrentHoleID() < courseManager.GetHoleCount() - 1)
-                            gameFinished = false;
-                    }
-                    courseManager.SetActiveBall(courseManager.GetBalls().get(courseManager.currentBalls.get(0)));
-                    if(gameFinished) {
-                        window.guiManager.currentScreen = "GameOver";
-                        GLFW.glfwSetInputMode(window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
-                    }
-                }
-
                 // if there is following hole, move the ball to that hole
                 if(ball.getCurrentHoleID() < courseManager.GetHoleCount() - 1) {
                     ball.setCurrentHoleID(ball.getCurrentHoleID() + 1);
@@ -415,9 +398,28 @@ public class Game implements ILogic {
                 // if the ball is my ball, go to the next ball
                 if(activeBall == ball)
                     courseManager.NextBall();
+                    
                 // if the ball isn't in the list of finished players, add it to that list
                 if(!courseManager.finishedBalls.contains(courseManager.GetBalls().indexOf(ball)))
                     courseManager.BallFinish(ball);
+
+                // if there are no players left for that hole, clear the finished players list
+                // then check if the last hole was completed, showing the game over screen 
+                if(courseManager.currentBalls.isEmpty()) {
+                    courseManager.currentBalls = new ArrayList<>(courseManager.finishedBalls);
+                    courseManager.finishedBalls.clear();
+                    courseManager.SetActiveBall(courseManager.GetBalls().get(courseManager.currentBalls.get(0)));
+
+                    boolean gameFinished = true;
+                    for(int ballIndex : courseManager.currentBalls) {
+                        if(courseManager.GetBall(ballIndex).getCurrentHoleID() < courseManager.GetHoleCount() - 1)
+                            gameFinished = false;
+                    }
+                    if(gameFinished) {
+                        window.guiManager.currentScreen = "GameOver";
+                        GLFW.glfwSetInputMode(window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+                    }
+                }
 
                 // get the new ball of whoever's turn it is
                 activeBall = courseManager.GetActiveBall();
